@@ -51,6 +51,7 @@ public sealed class PerformanceSettings
 
 public sealed class AppSettings
 {
+    public string Language { get; set; } = "tr"; // "tr" or "en"
     public AppearanceSettings Appearance { get; set; } = new();
     public AvatarSettings Avatar { get; set; } = new();
     public MiniModeSettings MiniMode { get; set; } = new();
@@ -90,6 +91,7 @@ public static class SettingsService
                     
                     // Sync start with windows from actual OS state if needed
                     _current.Behavior.StartWithWindows = StartupService.IsStartupEnabled();
+                    LocalizationService.CurrentLanguage = _current.Language;
                     return _current;
                 }
             }
@@ -100,6 +102,7 @@ public static class SettingsService
 
         _current = new AppSettings();
         _current.Behavior.StartWithWindows = StartupService.IsStartupEnabled();
+        LocalizationService.CurrentLanguage = _current.Language;
         Save();
         return _current;
     }
@@ -108,6 +111,7 @@ public static class SettingsService
     {
         try
         {
+            _current.Language = LocalizationService.CurrentLanguage;
             Directory.CreateDirectory(AppFolder);
             string json = JsonSerializer.Serialize(_current, JsonOptions);
             File.WriteAllText(SettingsFilePath, json, System.Text.Encoding.UTF8);

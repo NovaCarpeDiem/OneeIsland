@@ -121,8 +121,39 @@ public partial class SettingsWindow : Window
         UpdatePerfDescription(s.Performance.PerformanceMode);
         ChkReduceMotion.IsChecked = s.Performance.ReduceMotion;
 
+        // Language
+        SelectSegment(new[] { BtnLangTr, BtnLangEn }, LocalizationService.CurrentLanguage);
+        ApplyLanguage();
+
         // Default tab
         SwitchSection("Appearance");
+    }
+
+    private void BtnLang_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.Tag is string lang)
+        {
+            SelectSegment(new[] { BtnLangTr, BtnLangEn }, lang);
+            LocalizationService.CurrentLanguage = lang;
+            SettingsService.Current.Language = lang;
+            SettingsService.Save();
+            ApplyLanguage();
+        }
+    }
+
+    private void ApplyLanguage()
+    {
+        TabBtnAppearance.Content = "🎨 " + LocalizationService.T("NavAppearance");
+        TabBtnAvatar.Content = "🤖 " + LocalizationService.T("NavAvatar");
+        TabBtnMini.Content = "🫧 " + LocalizationService.T("NavMini");
+        TabBtnBehavior.Content = "⚙️ " + LocalizationService.T("NavBehavior");
+        TabBtnPerf.Content = "⚡ " + LocalizationService.T("NavPerf");
+
+        if (TxtLangCardTitle != null) TxtLangCardTitle.Text = LocalizationService.T("LangCardTitle");
+        if (TxtLangCardDesc != null) TxtLangCardDesc.Text = LocalizationService.T("LangCardDesc");
+
+        if (BtnResetDefaults != null)
+            BtnResetDefaults.Content = "↺ " + (LocalizationService.CurrentLanguage == "en" ? "Reset to Defaults" : "Varsayılana Sıfırla");
     }
 
     private void SelectSegment(Button[] buttons, string selectedTag)

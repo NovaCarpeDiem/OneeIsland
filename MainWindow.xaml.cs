@@ -105,6 +105,13 @@ public partial class MainWindow : Window
     private readonly DispatcherTimer _ghostCheckTimer = new();
 
     private Forms.NotifyIcon? _notifyIcon;
+    private Forms.ToolStripMenuItem? _trayToggleItem;
+    private Forms.ToolStripMenuItem? _trayPinItem;
+    private Forms.ToolStripMenuItem? _traySnapItem;
+    private Forms.ToolStripMenuItem? _trayResetItem;
+    private Forms.ToolStripMenuItem? _traySettingsItem;
+    private Forms.ToolStripMenuItem? _trayCoffeeItem;
+    private Forms.ToolStripMenuItem? _trayExitItem;
 
     private LyricsData? _currentLyrics;
     private string _lastLyricsTrackSignature = "";
@@ -402,6 +409,8 @@ public partial class MainWindow : Window
         };
 
         SettingsService.Load();
+        LocalizationService.LanguageChanged += () => Dispatcher.InvokeAsync(ApplyLanguage);
+        ApplyLanguage();
         SettingsService.SettingsChanged += s => Dispatcher.InvokeAsync(() => ApplyAllSettings(s));
         ApplyAllSettings(SettingsService.Current);
 
@@ -1081,24 +1090,31 @@ public partial class MainWindow : Window
     {
         try
         {
+            string icoPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app.ico");
+            System.Drawing.Icon? appIco = null;
+            if (File.Exists(icoPath))
+            {
+                try { appIco = new System.Drawing.Icon(icoPath); } catch { }
+            }
+
             _notifyIcon = new Forms.NotifyIcon
             {
-                Icon = System.Drawing.SystemIcons.Application,
-                Text = "Dynamic Island Windows",
+                Icon = appIco ?? System.Drawing.SystemIcons.Application,
+                Text = "Onee Island",
                 Visible = true
             };
 
             var contextMenu = new Forms.ContextMenuStrip();
 
-            var toggleItem = new Forms.ToolStripMenuItem("Göster / Gizle");
-            toggleItem.Click += (s, e) =>
+            _trayToggleItem = new Forms.ToolStripMenuItem(LocalizationService.T("TrayToggle"));
+            _trayToggleItem.Click += (s, e) =>
             {
                 if (Visibility == Visibility.Visible) Hide();
                 else { Show(); Activate(); }
             };
 
-            var pinItem = new Forms.ToolStripMenuItem("Sabitlemeyi Aç / Kapat");
-            pinItem.Click += (s, e) =>
+            _trayPinItem = new Forms.ToolStripMenuItem(LocalizationService.T("TrayPin"));
+            _trayPinItem.Click += (s, e) =>
             {
                 _isPinned = !_isPinned;
                 _savedState.IsPinned = _isPinned;
@@ -1107,17 +1123,17 @@ public partial class MainWindow : Window
                 if (_isPinned) ExpandIsland();
             };
 
-            var snapItem = new Forms.ToolStripMenuItem("📸 Tam Ekran Görüntüsü Al");
-            snapItem.Click += async (s, e) => await TakeFullScreenshotAsync();
+            _traySnapItem = new Forms.ToolStripMenuItem("📸 " + LocalizationService.T("TooltipFullScreenshot"));
+            _traySnapItem.Click += async (s, e) => await TakeFullScreenshotAsync();
 
-            var resetPosItem = new Forms.ToolStripMenuItem("Konumu Ortala");
-            resetPosItem.Click += (s, e) => CenterAtTop();
+            _trayResetItem = new Forms.ToolStripMenuItem(LocalizationService.T("TrayReset"));
+            _trayResetItem.Click += (s, e) => CenterAtTop();
 
-            var settingsItem = new Forms.ToolStripMenuItem("⚙️ Ayarlar (Settings)");
-            settingsItem.Click += (s, e) => OpenSettingsWindow();
+            _traySettingsItem = new Forms.ToolStripMenuItem(LocalizationService.T("TraySettings"));
+            _traySettingsItem.Click += (s, e) => OpenSettingsWindow();
 
-            var coffeeItem = new Forms.ToolStripMenuItem("☕ Geliştiriciye Kahve Ismarla (Buy Me a Coffee)");
-            coffeeItem.Click += (s, e) =>
+            _trayCoffeeItem = new Forms.ToolStripMenuItem(LocalizationService.T("TrayCoffee"));
+            _trayCoffeeItem.Click += (s, e) =>
             {
                 try
                 {
@@ -1126,22 +1142,22 @@ public partial class MainWindow : Window
                 catch { }
             };
 
-            var exitItem = new Forms.ToolStripMenuItem("Çıkış");
-            exitItem.Click += (s, e) =>
+            _trayExitItem = new Forms.ToolStripMenuItem(LocalizationService.T("TrayExit"));
+            _trayExitItem.Click += (s, e) =>
             {
                 _notifyIcon.Visible = false;
                 Close();
             };
 
-            contextMenu.Items.Add(toggleItem);
-            contextMenu.Items.Add(pinItem);
-            contextMenu.Items.Add(snapItem);
-            contextMenu.Items.Add(resetPosItem);
+            contextMenu.Items.Add(_trayToggleItem);
+            contextMenu.Items.Add(_trayPinItem);
+            contextMenu.Items.Add(_traySnapItem);
+            contextMenu.Items.Add(_trayResetItem);
             contextMenu.Items.Add(new Forms.ToolStripSeparator());
-            contextMenu.Items.Add(settingsItem);
-            contextMenu.Items.Add(coffeeItem);
+            contextMenu.Items.Add(_traySettingsItem);
+            contextMenu.Items.Add(_trayCoffeeItem);
             contextMenu.Items.Add(new Forms.ToolStripSeparator());
-            contextMenu.Items.Add(exitItem);
+            contextMenu.Items.Add(_trayExitItem);
 
             _notifyIcon.ContextMenuStrip = contextMenu;
             _notifyIcon.DoubleClick += (s, e) =>
@@ -1153,6 +1169,31 @@ public partial class MainWindow : Window
         catch
         {
         }
+    }
+
+    private void ApplyLanguage()
+    {
+        if (TabLabelMedia != null) TabLabelMedia.Text = LocalizationService.T("TabMedia");
+        if (TabLabelTray != null) TabLabelTray.Text = LocalizationService.T("TabTray");
+        if (TabLabelStats != null) TabLabelStats.Text = LocalizationService.T("TabSystem");
+        if (TabLabelTimer != null) TabLabelTimer.Text = LocalizationService.T("TabTimer");
+        if (TabLabelDock != null) TabLabelDock.Text = LocalizationService.T("TabDock");
+
+        if (_trayToggleItem != null) _trayToggleItem.Text = LocalizationService.T("TrayToggle");
+        if (_trayPinItem != null) _trayPinItem.Text = LocalizationService.T("TrayPin");
+        if (_traySnapItem != null) _traySnapItem.Text = "📸 " + LocalizationService.T("TooltipFullScreenshot");
+        if (_trayResetItem != null) _trayResetItem.Text = LocalizationService.T("TrayReset");
+        if (_traySettingsItem != null) _traySettingsItem.Text = LocalizationService.T("TraySettings");
+        if (_trayCoffeeItem != null) _trayCoffeeItem.Text = LocalizationService.T("TrayCoffee");
+        if (_trayExitItem != null) _trayExitItem.Text = LocalizationService.T("TrayExit");
+
+        if (LyricsToggleBtn != null) LyricsToggleBtn.ToolTip = LocalizationService.CurrentLanguage == "en" ? "Live Lyrics (Karaoke Mode)" : "Canlı Şarkı Sözleri (Karaoke Modu)";
+        if (PinButton != null) PinButton.ToolTip = LocalizationService.T("TooltipPin");
+        if (StealthModeBtn != null) StealthModeBtn.ToolTip = LocalizationService.CurrentLanguage == "en" ? "Stealth Thin Bar Mode" : "İnce Çizgi Modu";
+
+        var now = DateTime.Now;
+        if (MiniCenterText != null && !_isMediaActive)
+            MiniCenterText.Text = $"{now:HH:mm}   {now.ToString("dddd", LocalizationService.Culture)}";
     }
 
     #region Main Update Loop
@@ -1170,7 +1211,7 @@ public partial class MainWindow : Window
         _loopTickCounter++;
         var now = DateTime.Now;
         string timeStr = now.ToString("HH:mm");
-        string dayStr = now.ToString("dddd");
+        string dayStr = now.ToString("dddd", LocalizationService.Culture);
 
         var media = await _mediaService.GetCurrentTrackAsync();
         if (_isAnimating) return;
@@ -2786,7 +2827,7 @@ public partial class MainWindow : Window
         // 3. Immediately populate text and indicators synchronously so the pill is NEVER blank
         var now = DateTime.Now;
         string timeStr = now.ToString("HH:mm");
-        string dayStr = now.ToString("dddd");
+        string dayStr = now.ToString("dddd", LocalizationService.Culture);
 
         if (_isMediaActive && !string.IsNullOrWhiteSpace(MiniTrackTitleText.Text))
         {
