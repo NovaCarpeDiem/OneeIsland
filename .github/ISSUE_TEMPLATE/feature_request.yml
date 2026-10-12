@@ -1,0 +1,43 @@
+name: "✨ Feature Request"
+description: "Suggest an idea or enhancement for Onee Island or the Onee companion"
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an awesome idea for the Dynamic Island, widgets, or the Onee 3D avatar? We'd love to hear it!
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: "Problem or Need"
+      description: "Is your feature request related to a problem or a gap in current functionality? Describe it here."
+      placeholder: "I'm always frustrated when..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: "Proposed Solution"
+      description: "Describe what you would like to see added or changed in Onee Island."
+      placeholder: "Add a widget/toggle that allows..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "Alternatives Considered"
+      description: "Any alternative solutions, UI concepts, or workarounds you've thought of?"
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: "Additional Context / Mockups"
+      description: "Add any other context, sketches, screenshots, or design mockups."
+    validations:
+      required: false

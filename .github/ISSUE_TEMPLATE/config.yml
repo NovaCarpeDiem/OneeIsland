@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "☕ Buy Me a Coffee / Support the Developer"
+    url: "https://www.buymeacoffee.com/NovaCarpeDiem"
+    about: "Support the creator and ongoing development of Onee Island."
+  - name: "💬 Ask a Question or General Discussion"
+    url: "https://github.com/NovaCarpeDiem/OneeIsland/discussions"
+    about: "Have general questions or ideas to discuss with the community?"

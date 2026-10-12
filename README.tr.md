@@ -133,5 +133,11 @@ Eğer **Onee Island** hoşunuza gittiyse ve yeni özelliklerin, 3D animasyonlar�
 
 ---
 
+## 🤝 Katkıda Bulunma
+Topluluk katkılarını, hata bildirimlerini ve yeni özellik önerilerini sabırsızlıkla bekliyoruz! Başlamak için lütfen [Katkı Rehberi'ne (CONTRIBUTING.md)](CONTRIBUTING.md) göz atın.
+
+---
+
 ## 📄 Lisans
 Bu proje [MIT Lisansı](LICENSE) kapsamında açık kaynaklıdır. Dilediğiniz gibi fork edebilir, geliştirebilir ve katkı sağlayabilirsiniz!
+

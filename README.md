@@ -133,6 +133,12 @@ If you enjoy **Onee Island** and would like to support continuous development, n
 
 ---
 
+## 🤝 Contributing
+Contributions, bug reports, and feature suggestions are very welcome! Please check out our [Contributing Guide](CONTRIBUTING.md) to get started.
+
+---
+
 ## 📄 License
 This project is open-source under the [MIT License](LICENSE).
 Feel free to fork, customize, and contribute!
+
