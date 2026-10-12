@@ -1,0 +1,529 @@
+<Window x:Class="DynamicIslandWin.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Dynamic Island • Ayarlar"
+        Icon="app.ico"
+        Width="510" Height="710"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize"
+        ShowInTaskbar="True">
+
+    <Window.Resources>
+        <!-- Card Container Style -->
+        <Style x:Key="SettingsCard" TargetType="Border">
+            <Setter Property="Background" Value="#10FFFFFF" />
+            <Setter Property="BorderBrush" Value="#20FFFFFF" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="14" />
+            <Setter Property="Padding" Value="14,12" />
+            <Setter Property="Margin" Value="0,0,0,10" />
+        </Style>
+
+        <!-- Segmented Option Button Style -->
+        <Style x:Key="SegmentButton" TargetType="Button">
+            <Setter Property="Background" Value="#15FFFFFF" />
+            <Setter Property="Foreground" Value="#94A3B8" />
+            <Setter Property="BorderBrush" Value="#25FFFFFF" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Padding" Value="12,5" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="SegBorder" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="SegBorder" Property="Background" Value="#28FFFFFF" />
+                                <Setter Property="Foreground" Value="#FFFFFF" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <!-- Outer Shadow and Glass Shell -->
+    <Border Margin="12" CornerRadius="22" BorderThickness="1.2" BorderBrush="#35FFFFFF" ClipToBounds="False">
+        <Border.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#F8080B14" Offset="0.0" />
+                <GradientStop Color="#FA0D111E" Offset="0.6" />
+                <GradientStop Color="#F8080B14" Offset="1.0" />
+            </LinearGradientBrush>
+        </Border.Background>
+        <Border.Effect>
+            <DropShadowEffect Color="#000000" BlurRadius="24" ShadowDepth="6" Opacity="0.75" />
+        </Border.Effect>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="52" />
+                <RowDefinition Height="46" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="54" />
+            </Grid.RowDefinitions>
+
+            <!-- 1. Custom Title Bar -->
+            <Grid Grid.Row="0" Margin="16,0,16,0" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="26" Height="26" CornerRadius="8" Background="#25F43F5E" BorderBrush="#80F43F5E" BorderThickness="1" Margin="0,0,10,0">
+                        <TextBlock Text="🏝️" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Text="Dynamic Island" Foreground="#FFFFFF" FontWeight="Bold" FontSize="13.5" VerticalAlignment="Center" />
+                    <TextBlock Text="• Ayarlar" Foreground="#94A3B8" FontSize="12.5" Margin="6,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+
+                <Button HorizontalAlignment="Right" VerticalAlignment="Center" Width="28" Height="28" Style="{StaticResource MinimalGhostButton}" Click="CloseButton_Click" ToolTip="Kapat">
+                    <TextBlock Text="✕" FontSize="12" Foreground="#94A3B8" />
+                </Button>
+            </Grid>
+
+            <!-- Subtle Divider -->
+            <Border Grid.Row="0" VerticalAlignment="Bottom" Height="1" Background="#18FFFFFF" Margin="14,0" />
+
+            <!-- 2. Category Navigation (Segmented Tabs) -->
+            <Border Grid.Row="1" Margin="14,6,14,6" Background="#12FFFFFF" CornerRadius="14" BorderThickness="1" BorderBrush="#1CFFFFFF" Padding="3">
+                <UniformGrid Columns="5">
+                    <Button x:Name="TabBtnAppearance" Content="🎨 Görünüm" Style="{StaticResource SegmentButton}" Click="NavTab_Click" Tag="Appearance" />
+                    <Button x:Name="TabBtnAvatar" Content="🤖 Avatar" Style="{StaticResource SegmentButton}" Click="NavTab_Click" Tag="Avatar" />
+                    <Button x:Name="TabBtnMini" Content="🫧 Mini Mod" Style="{StaticResource SegmentButton}" Click="NavTab_Click" Tag="MiniMode" />
+                    <Button x:Name="TabBtnBehavior" Content="⚙️ Davranış" Style="{StaticResource SegmentButton}" Click="NavTab_Click" Tag="Behavior" />
+                    <Button x:Name="TabBtnPerf" Content="⚡ Performans" Style="{StaticResource SegmentButton}" Click="NavTab_Click" Tag="Performance" />
+                </UniformGrid>
+            </Border>
+
+            <!-- 3. Scrollable Settings Content Area -->
+            <ScrollViewer Grid.Row="2" Margin="14,6,14,6" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <!-- ============================================== -->
+                    <!-- SECTION 1: APPEARANCE                          -->
+                    <!-- ============================================== -->
+                    <StackPanel x:Name="SectionAppearance">
+                        <!-- Island Glow Card -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid Grid.Row="0" Margin="0,0,0,8">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="✨" Margin="0,0,6,0" />
+                                        <TextBlock Text="Ada Işıması (Glow)" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock x:Name="TxtGlowVal" Text="%70" Foreground="{DynamicResource DynamicAccentBrush}" FontWeight="Bold" FontSize="11.5" HorizontalAlignment="Right" />
+                                </Grid>
+                                <Slider Grid.Row="1" x:Name="SliderIslandGlow" Minimum="0" Maximum="100" Value="70" ValueChanged="SliderIslandGlow_ValueChanged" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Island Opacity Card -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid Grid.Row="0" Margin="0,0,0,8">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="👁️" Margin="0,0,6,0" />
+                                        <TextBlock Text="Ada Saydamlığı (Opacity)" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock x:Name="TxtOpacityVal" Text="%100" Foreground="{DynamicResource DynamicAccentBrush}" FontWeight="Bold" FontSize="11.5" HorizontalAlignment="Right" />
+                                </Grid>
+                                <Slider Grid.Row="1" x:Name="SliderIslandOpacity" Minimum="20" Maximum="100" Value="100" ValueChanged="SliderIslandOpacity_ValueChanged" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Animation Speed Card -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="⏱️" Margin="0,0,6,0" />
+                                    <TextBlock Text="Animasyon Hızı" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button x:Name="BtnAnimSpeedSlow" Content="Yavaş" Style="{StaticResource SegmentButton}" Padding="9,4" Margin="0,0,4,0" Click="AnimSpeed_Click" Tag="Slow" />
+                                    <Button x:Name="BtnAnimSpeedNormal" Content="Normal" Style="{StaticResource SegmentButton}" Padding="9,4" Margin="0,0,4,0" Click="AnimSpeed_Click" Tag="Normal" />
+                                    <Button x:Name="BtnAnimSpeedFast" Content="Hızlı" Style="{StaticResource SegmentButton}" Padding="9,4" Click="AnimSpeed_Click" Tag="Fast" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Adaptive Glow Toggle Card -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <StackPanel VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="🎨" Margin="0,0,6,0" />
+                                        <TextBlock Text="Adaptif Işıma (Albüm Kapağı Rengi)" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="Çalan şarkının albüm kapağına göre ada neonları renk alır" Foreground="#94A3B8" FontSize="10.5" Margin="22,2,0,0" />
+                                </StackPanel>
+                                <CheckBox x:Name="ChkAdaptiveGlow" HorizontalAlignment="Right" VerticalAlignment="Center" Click="ChkAdaptiveGlow_Click" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Theme Selection Card -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,8">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="🌈" Margin="0,0,6,0" />
+                                        <TextBlock Text="Ada Renk Teması" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" />
+                                    </StackPanel>
+                                </Grid>
+                                <UniformGrid Columns="3" Margin="0,0,0,8">
+                                    <Button x:Name="BtnThemeAdaptive" Content="Adaptif" Style="{StaticResource SegmentButton}" Margin="0,0,4,0" Click="ThemeBtn_Click" Tag="Adaptive" />
+                                    <Button x:Name="BtnThemeYellow" Content="Günışığı Sarı" Style="{StaticResource SegmentButton}" Margin="0,0,4,0" Click="ThemeBtn_Click" Tag="Yellow" />
+                                    <Button x:Name="BtnThemeCustom" Content="Özel Renk" Style="{StaticResource SegmentButton}" Click="ThemeBtn_Click" Tag="Custom" />
+                                </UniformGrid>
+                                <!-- Custom Color Picker Row -->
+                                <StackPanel x:Name="CustomColorPanel" Orientation="Horizontal" Margin="0,4,0,0" Visibility="Collapsed">
+                                    <TextBlock Text="Renk Seçin:" Foreground="#94A3B8" FontSize="11" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                    <Button Width="20" Height="20" Background="#F43F5E" BorderThickness="0" Margin="0,0,6,0" Cursor="Hand" Click="PresetColor_Click" Tag="#F43F5E" />
+                                    <Button Width="20" Height="20" Background="#F59E0B" BorderThickness="0" Margin="0,0,6,0" Cursor="Hand" Click="PresetColor_Click" Tag="#F59E0B" />
+                                    <Button Width="20" Height="20" Background="#10B981" BorderThickness="0" Margin="0,0,6,0" Cursor="Hand" Click="PresetColor_Click" Tag="#10B981" />
+                                    <Button Width="20" Height="20" Background="#06B6D4" BorderThickness="0" Margin="0,0,6,0" Cursor="Hand" Click="PresetColor_Click" Tag="#06B6D4" />
+                                    <Button Width="20" Height="20" Background="#8B5CF6" BorderThickness="0" Margin="0,0,6,0" Cursor="Hand" Click="PresetColor_Click" Tag="#8B5CF6" />
+                                    <Button Width="20" Height="20" Background="#EC4899" BorderThickness="0" Margin="0,0,8,0" Cursor="Hand" Click="PresetColor_Click" Tag="#EC4899" />
+                                    <TextBox x:Name="TxtCustomHex" Width="70" Height="22" Background="#20FFFFFF" Foreground="#FFFFFF" BorderBrush="#35FFFFFF" FontSize="10.5" TextAlignment="Center" VerticalAlignment="Center" TextChanged="TxtCustomHex_TextChanged" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- ============================================== -->
+                    <!-- SECTION 2: AVATAR                              -->
+                    <!-- ============================================== -->
+                    <StackPanel x:Name="SectionAvatar" Visibility="Collapsed">
+                        <!-- Avatar Enabled Toggle -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <StackPanel VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="🤖" Margin="0,0,6,0" />
+                                        <TextBlock Text="Avatar Aktif" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="Ada üzerinde Onee karakterini gösterir / gizler" Foreground="#94A3B8" FontSize="10.5" Margin="22,2,0,0" />
+                                </StackPanel>
+                                <CheckBox x:Name="ChkAvatarEnabled" HorizontalAlignment="Right" VerticalAlignment="Center" Click="ChkAvatarEnabled_Click" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Avatar Size Slider -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid Grid.Row="0" Margin="0,0,0,8">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="📏" Margin="0,0,6,0" />
+                                        <TextBlock Text="Avatar Boyutu" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock x:Name="TxtAvatarSizeVal" Text="%100" Foreground="{DynamicResource DynamicAccentBrush}" FontWeight="Bold" FontSize="11.5" HorizontalAlignment="Right" />
+                                </Grid>
+                                <Slider Grid.Row="1" x:Name="SliderAvatarSize" Minimum="70" Maximum="140" Value="100" ValueChanged="SliderAvatarSize_ValueChanged" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Idle Animation Toggle -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <StackPanel VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="🎵" Margin="0,0,6,0" />
+                                        <TextBlock Text="Boşta &amp; Dans Animasyonları" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="Müzikle kafa sallama (head-bobbing) ve ritim animasyonları" Foreground="#94A3B8" FontSize="10.5" Margin="22,2,0,0" />
+                                </StackPanel>
+                                <CheckBox x:Name="ChkAvatarIdle" HorizontalAlignment="Right" VerticalAlignment="Center" Click="ChkAvatarIdle_Click" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Reaction Animations Toggle -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <StackPanel VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="🎭" Margin="0,0,6,0" />
+                                        <TextBlock Text="Tepki &amp; Duygu Animasyonları" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="Tıklama, sayaç bitişi, CPU yükü ve pil durumuna göre tepkiler" Foreground="#94A3B8" FontSize="10.5" Margin="22,2,0,0" />
+                                </StackPanel>
+                                <CheckBox x:Name="ChkAvatarReactions" HorizontalAlignment="Right" VerticalAlignment="Center" Click="ChkAvatarReactions_Click" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Avatar Glow Toggle -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <StackPanel VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="💡" Margin="0,0,6,0" />
+                                        <TextBlock Text="Avatar Çevre Işıması" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="Avatar arkasındaki parlayan neon halo çemberi" Foreground="#94A3B8" FontSize="10.5" Margin="22,2,0,0" />
+                                </StackPanel>
+                                <CheckBox x:Name="ChkAvatarGlow" HorizontalAlignment="Right" VerticalAlignment="Center" Click="ChkAvatarGlow_Click" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Avatar Animation Speed -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="⚡" Margin="0,0,6,0" />
+                                    <TextBlock Text="Animasyon Temposu" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button x:Name="BtnAvatarSpeedSlow" Content="Yavaş" Style="{StaticResource SegmentButton}" Padding="9,4" Margin="0,0,4,0" Click="AvatarSpeed_Click" Tag="Slow" />
+                                    <Button x:Name="BtnAvatarSpeedNormal" Content="Normal" Style="{StaticResource SegmentButton}" Padding="9,4" Margin="0,0,4,0" Click="AvatarSpeed_Click" Tag="Normal" />
+                                    <Button x:Name="BtnAvatarSpeedFast" Content="Hızlı" Style="{StaticResource SegmentButton}" Padding="9,4" Click="AvatarSpeed_Click" Tag="Fast" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- ============================================== -->
+                    <!-- SECTION 3: MINI MODE                           -->
+                    <!-- ============================================== -->
+                    <StackPanel x:Name="SectionMiniMode" Visibility="Collapsed">
+                        <!-- Mini Mode Enabled -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <StackPanel VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="🫧" Margin="0,0,6,0" />
+                                        <TextBlock Text="Mini Mod Aktif" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="Adayı mini avatar baloncuğuna küçültme yeteneği" Foreground="#94A3B8" FontSize="10.5" Margin="22,2,0,0" />
+                                </StackPanel>
+                                <CheckBox x:Name="ChkMiniModeEnabled" HorizontalAlignment="Right" VerticalAlignment="Center" Click="ChkMiniModeEnabled_Click" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Right Click Mini Mode -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <StackPanel VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="🖱️" Margin="0,0,6,0" />
+                                        <TextBlock Text="Sağ Tık ile Mini Moda Geçiş" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="Adaya sağ tıklandığında mini baloncuk moduna morph olur" Foreground="#94A3B8" FontSize="10.5" Margin="22,2,0,0" />
+                                </StackPanel>
+                                <CheckBox x:Name="ChkRightClickMini" HorizontalAlignment="Right" VerticalAlignment="Center" Click="ChkRightClickMini_Click" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Bubble Size Slider -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid Grid.Row="0" Margin="0,0,0,8">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="🎯" Margin="0,0,6,0" />
+                                        <TextBlock Text="Baloncuk Çapı (Bubble Size)" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock x:Name="TxtBubbleSizeVal" Text="58 px" Foreground="{DynamicResource DynamicAccentBrush}" FontWeight="Bold" FontSize="11.5" HorizontalAlignment="Right" />
+                                </Grid>
+                                <Slider Grid.Row="1" x:Name="SliderBubbleSize" Minimum="48" Maximum="76" Value="58" ValueChanged="SliderBubbleSize_ValueChanged" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Bubble Position -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="📍" Margin="0,0,6,0" />
+                                    <TextBlock Text="Baloncuk Konumu" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button x:Name="BtnPosTopRight" Content="Sağ Üst" Style="{StaticResource SegmentButton}" Padding="11,4" Margin="0,0,4,0" Click="BubblePos_Click" Tag="Top Right" />
+                                    <Button x:Name="BtnPosTopLeft" Content="Sol Üst" Style="{StaticResource SegmentButton}" Padding="11,4" Click="BubblePos_Click" Tag="Top Left" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Transition Speed -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="🚀" Margin="0,0,6,0" />
+                                    <TextBlock Text="Geçiş Hızı" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button x:Name="BtnMiniSpeedSlow" Content="Yavaş" Style="{StaticResource SegmentButton}" Padding="9,4" Margin="0,0,4,0" Click="MiniSpeed_Click" Tag="Slow" />
+                                    <Button x:Name="BtnMiniSpeedNormal" Content="Normal" Style="{StaticResource SegmentButton}" Padding="9,4" Margin="0,0,4,0" Click="MiniSpeed_Click" Tag="Normal" />
+                                    <Button x:Name="BtnMiniSpeedFast" Content="Hızlı" Style="{StaticResource SegmentButton}" Padding="9,4" Click="MiniSpeed_Click" Tag="Fast" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Fluid Morph Toggle -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <StackPanel VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="🧲" Margin="0,0,6,0" />
+                                        <TextBlock Text="Akıcı Yaylanma (Fluid Squash &amp; Stretch)" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="Geçiş sırasında elastik esneme ve tatlı çarpma fiziği" Foreground="#94A3B8" FontSize="10.5" Margin="22,2,0,0" />
+                                </StackPanel>
+                                <CheckBox x:Name="ChkFluidMorph" HorizontalAlignment="Right" VerticalAlignment="Center" Click="ChkFluidMorph_Click" />
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- ============================================== -->
+                    <!-- SECTION 4: BEHAVIOR                            -->
+                    <!-- ============================================== -->
+                    <StackPanel x:Name="SectionBehavior" Visibility="Collapsed">
+                        <!-- Start With Windows -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <StackPanel VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="🚀" Margin="0,0,6,0" />
+                                        <TextBlock Text="Windows ile Birlikte Başlat" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="Bilgisayar açıldığında adayı otomatik çalıştırır" Foreground="#94A3B8" FontSize="10.5" Margin="22,2,0,0" />
+                                </StackPanel>
+                                <CheckBox x:Name="ChkStartWithWindows" HorizontalAlignment="Right" VerticalAlignment="Center" Click="ChkStartWithWindows_Click" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Show Notifications -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <StackPanel VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="🔔" Margin="0,0,6,0" />
+                                        <TextBlock Text="Bildirimleri Göster" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="Windows bildirimlerinde ada canlı toast banner açar" Foreground="#94A3B8" FontSize="10.5" Margin="22,2,0,0" />
+                                </StackPanel>
+                                <CheckBox x:Name="ChkShowNotifications" HorizontalAlignment="Right" VerticalAlignment="Center" Click="ChkShowNotifications_Click" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Music Reactions -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <StackPanel VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="🎧" Margin="0,0,6,0" />
+                                        <TextBlock Text="Müzik Tepkileri &amp; DJ Kulaklığı" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="Müzik çalarken avatara kulaklık takılır ve ritme uyar" Foreground="#94A3B8" FontSize="10.5" Margin="22,2,0,0" />
+                                </StackPanel>
+                                <CheckBox x:Name="ChkMusicReactions" HorizontalAlignment="Right" VerticalAlignment="Center" Click="ChkMusicReactions_Click" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Battery Reactions -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <StackPanel VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="⚡" Margin="0,0,6,0" />
+                                        <TextBlock Text="Pil &amp; Şarj Uyarıları" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="Pil %15 altına düştüğünde ve şarja takılınca haber verir" Foreground="#94A3B8" FontSize="10.5" Margin="22,2,0,0" />
+                                </StackPanel>
+                                <CheckBox x:Name="ChkBatteryReactions" HorizontalAlignment="Right" VerticalAlignment="Center" Click="ChkBatteryReactions_Click" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Volume Reactions -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <StackPanel VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="🔊" Margin="0,0,6,0" />
+                                        <TextBlock Text="Ses Değişim Göstergesi" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="Fare tekerleğiyle ada üzerinde ses değiştirme HUD'ı" Foreground="#94A3B8" FontSize="10.5" Margin="22,2,0,0" />
+                                </StackPanel>
+                                <CheckBox x:Name="ChkVolumeReactions" HorizontalAlignment="Right" VerticalAlignment="Center" Click="ChkVolumeReactions_Click" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Fullscreen Auto Hide -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <StackPanel VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="🎮" Margin="0,0,6,0" />
+                                        <TextBlock Text="Tam Ekranda Otomatik Gizle (Oyun/Film)" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="Tam ekran oyun veya video açıkken adayı gizler" Foreground="#94A3B8" FontSize="10.5" Margin="22,2,0,0" />
+                                </StackPanel>
+                                <CheckBox x:Name="ChkFullscreenAutoHide" HorizontalAlignment="Right" VerticalAlignment="Center" Click="ChkFullscreenAutoHide_Click" />
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- ============================================== -->
+                    <!-- SECTION 5: PERFORMANCE                        -->
+                    <!-- ============================================== -->
+                    <StackPanel x:Name="SectionPerformance" Visibility="Collapsed">
+                        <!-- Performance Mode Selector -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <TextBlock Text="🏎️" Margin="0,0,6,0" />
+                                    <TextBlock Text="Performans Profili" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" />
+                                </StackPanel>
+                                <UniformGrid Columns="3" Margin="0,0,0,8">
+                                    <Button x:Name="BtnPerfLow" Content="Tasarruf (Low)" Style="{StaticResource SegmentButton}" Margin="0,0,4,0" Click="PerfMode_Click" Tag="Low" />
+                                    <Button x:Name="BtnPerfBalanced" Content="Dengeli" Style="{StaticResource SegmentButton}" Margin="0,0,4,0" Click="PerfMode_Click" Tag="Balanced" />
+                                    <Button x:Name="BtnPerfHigh" Content="Yüksek (High)" Style="{StaticResource SegmentButton}" Click="PerfMode_Click" Tag="High" />
+                                </UniformGrid>
+                                <Border Background="#15000000" CornerRadius="8" Padding="10,8" Margin="0,4,0,0">
+                                    <TextBlock x:Name="TxtPerfDescription" Text="Görsel kalite ve performans dengesi." Foreground="#CBD5E1" FontSize="11" TextWrapping="Wrap" />
+                                </Border>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Reduce Motion Toggle -->
+                        <Border Style="{StaticResource SettingsCard}">
+                            <Grid>
+                                <StackPanel VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="🕊️" Margin="0,0,6,0" />
+                                        <TextBlock Text="Hareketi Azalt (Reduce Motion)" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="12" />
+                                    </StackPanel>
+                                    <TextBlock Text="Animasyonları sadeleştirir, yaylanmaları kapatır ve hızlandırır" Foreground="#94A3B8" FontSize="10.5" Margin="22,2,0,0" />
+                                </StackPanel>
+                                <CheckBox x:Name="ChkReduceMotion" HorizontalAlignment="Right" VerticalAlignment="Center" Click="ChkReduceMotion_Click" />
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- 4. Footer Actions (Reset to Defaults & Close) -->
+            <Border Grid.Row="3" BorderThickness="0,1,0,0" BorderBrush="#1CFFFFFF" Padding="16,10" Background="#0CFFFFFF">
+                <Grid>
+                    <Button x:Name="BtnResetDefaults" Content="↺ Varsayılana Sıfırla" Style="{StaticResource MinimalGhostButton}" Width="Auto" Height="30" Padding="10,0" HorizontalAlignment="Left" Foreground="#F87171" FontSize="11" Click="BtnResetDefaults_Click" ToolTip="Tüm ayarları ilk haline döndürür" />
+                    <Button Content="Tamam" Style="{StaticResource IslandIconButton}" Width="80" Height="30" Padding="0" HorizontalAlignment="Right" Click="CloseButton_Click" />
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

@@ -1,0 +1,1284 @@
+{
+  "name": "Onee",
+  "colors": {
+    "body": "#6c63ff",
+    "eyes": "#111316"
+  },
+  "animations": {
+    "sleeping": {
+      "name": "sleeping",
+      "description": "Yeux presque fermés, respiration lente et expression de sommeil.",
+      "playbackMode": "loop",
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 4800,
+        "minIntervalMs": 6500,
+        "maxIntervalMs": 9500,
+        "durationMs": 420
+      },
+      "steps": [
+        {
+          "expressionId": "expression-13",
+          "holdMs": 3600,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-22",
+          "holdMs": 3600,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-04",
+          "holdMs": 3600,
+          "transitionMs": 500,
+          "transition": "smooth"
+        }
+      ]
+    },
+    "waking": {
+      "name": "waking",
+      "description": "Séquence courte de réveil avant retour vers une expression neutre.",
+      "playbackMode": "loop",
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 1200,
+        "minIntervalMs": 1800,
+        "maxIntervalMs": 3600,
+        "durationMs": 220
+      },
+      "steps": [
+        {
+          "expressionId": "expression-13",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        }
+      ]
+    },
+    "idle": {
+      "name": "idle",
+      "description": "Micro-mouvements lents, expressions 00 et 08, clignement rare.",
+      "playbackMode": "loop",
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 2600,
+        "minIntervalMs": 3400,
+        "maxIntervalMs": 6200,
+        "durationMs": 280
+      },
+      "steps": [
+        {
+          "expressionId": "expression-00",
+          "holdMs": 5200,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-08",
+          "holdMs": 5200,
+          "transitionMs": 500,
+          "transition": "smooth"
+        }
+      ]
+    },
+    "listening": {
+      "name": "listening",
+      "description": "Expressions 10, 01 et 19, regard stable et clignement attentif.",
+      "playbackMode": "loop",
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 3200,
+        "minIntervalMs": 4800,
+        "maxIntervalMs": 7200,
+        "durationMs": 240
+      },
+      "steps": [
+        {
+          "expressionId": "expression-10",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-01",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-19",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        }
+      ]
+    },
+    "thinking": {
+      "name": "thinking",
+      "description": "Regard haut et latéral, expressions asymétriques et changements fréquents.",
+      "playbackMode": "loop",
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 2100,
+        "minIntervalMs": 2800,
+        "maxIntervalMs": 5000,
+        "durationMs": 260
+      },
+      "steps": [
+        {
+          "expressionId": "expression-08",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-16",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-14",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-17",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-05",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        }
+      ]
+    },
+    "searching": {
+      "name": "searching",
+      "description": "Balayage rapide et changements très fréquents.",
+      "playbackMode": "loop",
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 2100,
+        "minIntervalMs": 2800,
+        "maxIntervalMs": 5000,
+        "durationMs": 260
+      },
+      "steps": [
+        {
+          "expressionId": "expression-15",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-09",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-03",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-20",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-12",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-18",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        }
+      ]
+    },
+    "working": {
+      "name": "working",
+      "description": "Rythme régulier et expressions concentrées.",
+      "playbackMode": "loop",
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 2100,
+        "minIntervalMs": 2800,
+        "maxIntervalMs": 5000,
+        "durationMs": 260
+      },
+      "steps": [
+        {
+          "expressionId": "expression-07",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-16",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-11",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-10",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        }
+      ]
+    },
+    "excited": {
+      "name": "excited",
+      "description": "Grandes expressions et transitions rapides.",
+      "playbackMode": "loop",
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 1200,
+        "minIntervalMs": 1800,
+        "maxIntervalMs": 3600,
+        "durationMs": 220
+      },
+      "steps": [
+        {
+          "expressionId": "expression-02",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-17",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-21",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-03",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-11",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        }
+      ]
+    },
+    "bored": {
+      "name": "bored",
+      "description": "Cet état enchaîne un pool de presets et des clignements.",
+      "playbackMode": "loop",
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 4800,
+        "minIntervalMs": 6500,
+        "maxIntervalMs": 9500,
+        "durationMs": 420
+      },
+      "steps": [
+        {
+          "expressionId": "expression-04",
+          "holdMs": 3600,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-22",
+          "holdMs": 3600,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-00",
+          "holdMs": 3600,
+          "transitionMs": 500,
+          "transition": "smooth"
+        }
+      ]
+    },
+    "suspicious": {
+      "name": "suspicious",
+      "description": "Cet état enchaîne un pool de presets et des clignements.",
+      "playbackMode": "loop",
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 2100,
+        "minIntervalMs": 2800,
+        "maxIntervalMs": 5000,
+        "durationMs": 260
+      },
+      "steps": [
+        {
+          "expressionId": "expression-14",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-05",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-23",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        }
+      ]
+    },
+    "angry": {
+      "name": "angry",
+      "description": "Cet état enchaîne un pool de presets et des clignements.",
+      "playbackMode": "loop",
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 2100,
+        "minIntervalMs": 2800,
+        "maxIntervalMs": 5000,
+        "durationMs": 260
+      },
+      "steps": [
+        {
+          "expressionId": "expression-07",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-16",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        }
+      ]
+    },
+    "drowsy": {
+      "name": "drowsy",
+      "description": "Cet état enchaîne un pool de presets et des clignements.",
+      "playbackMode": "loop",
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 4800,
+        "minIntervalMs": 6500,
+        "maxIntervalMs": 9500,
+        "durationMs": 420
+      },
+      "steps": [
+        {
+          "expressionId": "expression-04",
+          "holdMs": 3600,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-22",
+          "holdMs": 3600,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-13",
+          "holdMs": 3600,
+          "transitionMs": 500,
+          "transition": "smooth"
+        }
+      ]
+    },
+    "happy": {
+      "name": "happy",
+      "description": "Cet état enchaîne un pool de presets et des clignements.",
+      "playbackMode": "loop",
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 2100,
+        "minIntervalMs": 2800,
+        "maxIntervalMs": 5000,
+        "durationMs": 260
+      },
+      "steps": [
+        {
+          "expressionId": "expression-02",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-11",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-17",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-19",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        }
+      ]
+    },
+    "curious": {
+      "name": "curious",
+      "description": "Inclinaisons et forte asymétrie.",
+      "playbackMode": "loop",
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 2100,
+        "minIntervalMs": 2800,
+        "maxIntervalMs": 5000,
+        "durationMs": 260
+      },
+      "steps": [
+        {
+          "expressionId": "expression-03",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-21",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-00",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-15",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        }
+      ]
+    },
+    "confused": {
+      "name": "confused",
+      "description": "Cet état enchaîne un pool de presets et des clignements.",
+      "playbackMode": "loop",
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 2100,
+        "minIntervalMs": 2800,
+        "maxIntervalMs": 5000,
+        "durationMs": 260
+      },
+      "steps": [
+        {
+          "expressionId": "expression-14",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-05",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-08",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        }
+      ]
+    },
+    "surprised": {
+      "name": "surprised",
+      "description": "Cet état enchaîne un pool de presets et des clignements.",
+      "playbackMode": "loop",
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 1200,
+        "minIntervalMs": 1800,
+        "maxIntervalMs": 3600,
+        "durationMs": 220
+      },
+      "steps": [
+        {
+          "expressionId": "expression-03",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-21",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        }
+      ]
+    },
+    "proud": {
+      "name": "proud",
+      "description": "Cet état enchaîne un pool de presets et des clignements.",
+      "playbackMode": "loop",
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 2100,
+        "minIntervalMs": 2800,
+        "maxIntervalMs": 5000,
+        "durationMs": 260
+      },
+      "steps": [
+        {
+          "expressionId": "expression-15",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-08",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-02",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        }
+      ]
+    },
+    "shy": {
+      "name": "shy",
+      "description": "Cet état enchaîne un pool de presets et des clignements.",
+      "playbackMode": "loop",
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 2100,
+        "minIntervalMs": 2800,
+        "maxIntervalMs": 5000,
+        "durationMs": 260
+      },
+      "steps": [
+        {
+          "expressionId": "expression-00",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-24",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-13",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        }
+      ]
+    },
+    "sad": {
+      "name": "sad",
+      "description": "Cet état enchaîne un pool de presets et des clignements.",
+      "playbackMode": "loop",
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 4800,
+        "minIntervalMs": 6500,
+        "maxIntervalMs": 9500,
+        "durationMs": 420
+      },
+      "steps": [
+        {
+          "expressionId": "expression-04",
+          "holdMs": 3600,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-13",
+          "holdMs": 3600,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-22",
+          "holdMs": 3600,
+          "transitionMs": 500,
+          "transition": "smooth"
+        }
+      ]
+    },
+    "laughing": {
+      "name": "laughing",
+      "description": "Cet état enchaîne un pool de presets et des clignements.",
+      "playbackMode": "loop",
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 1200,
+        "minIntervalMs": 1800,
+        "maxIntervalMs": 3600,
+        "durationMs": 220
+      },
+      "steps": [
+        {
+          "expressionId": "expression-02",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-11",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-17",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        }
+      ]
+    },
+    "scared": {
+      "name": "scared",
+      "description": "Cet état enchaîne un pool de presets et des clignements.",
+      "playbackMode": "loop",
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 1200,
+        "minIntervalMs": 1800,
+        "maxIntervalMs": 3600,
+        "durationMs": 220
+      },
+      "steps": [
+        {
+          "expressionId": "expression-03",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-21",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        }
+      ]
+    },
+    "playful": {
+      "name": "playful",
+      "description": "Cet état enchaîne un pool de presets et des clignements.",
+      "playbackMode": "loop",
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 2100,
+        "minIntervalMs": 2800,
+        "maxIntervalMs": 5000,
+        "durationMs": 260
+      },
+      "steps": [
+        {
+          "expressionId": "expression-02",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-17",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-11",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-08",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        }
+      ]
+    },
+    "celebrate": {
+      "name": "celebrate",
+      "description": "Cet état enchaîne un pool de presets et des clignements.",
+      "playbackMode": "loop",
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 1200,
+        "minIntervalMs": 1800,
+        "maxIntervalMs": 3600,
+        "durationMs": 220
+      },
+      "steps": [
+        {
+          "expressionId": "expression-02",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-08",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        },
+        {
+          "expressionId": "expression-17",
+          "holdMs": 2300,
+          "transitionMs": 500,
+          "transition": "smooth"
+        }
+      ]
+    }
+  },
+  "expressions": {
+    "expression-13": {
+      "id": "expression-13",
+      "headX": -8.752343750000001,
+      "headY": -8.743359375,
+      "headZ": -10.773828125000001,
+      "widthLeft": 50.133984375,
+      "widthRight": 50.133984375,
+      "heightLeft": 10,
+      "heightRight": 10,
+      "spacing": 55.689453125,
+      "positionXLeft": 8,
+      "positionXRight": 8,
+      "positionYLeft": 25.613671875,
+      "positionYRight": 25.613671875,
+      "leftAngle": 6.980078125,
+      "rightAngle": -7.012890625000001,
+      "perspective": 1,
+      "eyeMotion": "none",
+      "bodyMotion": "none"
+    },
+    "expression-22": {
+      "id": "expression-22",
+      "headX": 10.292578125,
+      "headY": 3.39921875,
+      "headZ": 7.583203125,
+      "widthLeft": 49.672265624999994,
+      "widthRight": 49.672265624999994,
+      "heightLeft": 10,
+      "heightRight": 10,
+      "spacing": 54.830078125,
+      "positionXLeft": 8,
+      "positionXRight": 8,
+      "positionYLeft": 25.613671875,
+      "positionYRight": 25.613671875,
+      "leftAngle": 6.980078125,
+      "rightAngle": -7.012890625000001,
+      "perspective": 1,
+      "eyeMotion": "none",
+      "bodyMotion": "none"
+    },
+    "expression-04": {
+      "id": "expression-04",
+      "headX": 3.4,
+      "headY": 13.22578125,
+      "headZ": 8.976953125,
+      "widthLeft": 45.775000000000006,
+      "widthRight": 45.775000000000006,
+      "heightLeft": 10,
+      "heightRight": 10,
+      "spacing": 50.285546874999994,
+      "positionXLeft": 8,
+      "positionXRight": 8,
+      "positionYLeft": 25.613671875,
+      "positionYRight": 25.613671875,
+      "leftAngle": 6.980078125,
+      "rightAngle": -7.012890625000001,
+      "perspective": 1,
+      "eyeMotion": "none",
+      "bodyMotion": "none"
+    },
+    "expression-00": {
+      "id": "expression-00",
+      "headX": 7.3,
+      "headY": 27.8,
+      "headZ": -16.1,
+      "widthLeft": 16.501171874999997,
+      "widthRight": 16.501171874999997,
+      "heightLeft": 30.37773437499999,
+      "heightRight": 30.37773437499999,
+      "spacing": 40.713281249999994,
+      "positionXLeft": 8,
+      "positionXRight": 8,
+      "positionYLeft": 5.113671875000001,
+      "positionYRight": 5.113671875000001,
+      "leftAngle": 6.980078125,
+      "rightAngle": -7.012890625000001,
+      "perspective": 1,
+      "eyeMotion": "none",
+      "bodyMotion": "none"
+    },
+    "expression-08": {
+      "id": "expression-08",
+      "headX": -12.303515625,
+      "headY": -17.601171875,
+      "headZ": 5.9109375,
+      "widthLeft": 14.605859374999994,
+      "widthRight": 14.605859374999994,
+      "heightLeft": 35.769921874999994,
+      "heightRight": 35.769921874999994,
+      "spacing": 41.31328125,
+      "positionXLeft": 8,
+      "positionXRight": 8,
+      "positionYLeft": 25.613671875,
+      "positionYRight": 25.613671875,
+      "leftAngle": 30.503125000000004,
+      "rightAngle": -31.055468750000003,
+      "perspective": 1,
+      "eyeMotion": "none",
+      "bodyMotion": "none"
+    },
+    "expression-10": {
+      "id": "expression-10",
+      "headX": 1.43359375,
+      "headY": 6.194140624999999,
+      "headZ": 10.56015625,
+      "widthLeft": 17.836718749999996,
+      "widthRight": 17.836718749999996,
+      "heightLeft": 46.130078125,
+      "heightRight": 46.130078125,
+      "spacing": 43.213281249999994,
+      "positionXLeft": 8,
+      "positionXRight": 8,
+      "positionYLeft": 25.613671875,
+      "positionYRight": 25.613671875,
+      "leftAngle": 6.980078125,
+      "rightAngle": -7.012890625000001,
+      "perspective": 1,
+      "eyeMotion": "none",
+      "bodyMotion": "none"
+    },
+    "expression-01": {
+      "id": "expression-01",
+      "headX": -15.057812500000004,
+      "headY": 0.14296874999999964,
+      "headZ": -14.549218750000001,
+      "widthLeft": 16.401171875000003,
+      "widthRight": 16.401171875000003,
+      "heightLeft": 42.5703125,
+      "heightRight": 42.5703125,
+      "spacing": 44.11328125,
+      "positionXLeft": 8,
+      "positionXRight": 8,
+      "positionYLeft": 25.613671875,
+      "positionYRight": 25.613671875,
+      "leftAngle": 6.980078125,
+      "rightAngle": -7.012890625000001,
+      "perspective": 1,
+      "eyeMotion": "none",
+      "bodyMotion": "none"
+    },
+    "expression-19": {
+      "id": "expression-19",
+      "headX": -6.077734375000001,
+      "headY": -11.03515625,
+      "headZ": -13.965625000000001,
+      "widthLeft": 17.045703125000003,
+      "widthRight": 17.045703125000003,
+      "heightLeft": 46.685156250000006,
+      "heightRight": 46.685156250000006,
+      "spacing": 42.61328125,
+      "positionXLeft": 8,
+      "positionXRight": 8,
+      "positionYLeft": 25.613671875,
+      "positionYRight": 25.613671875,
+      "leftAngle": 6.980078125,
+      "rightAngle": -7.012890625000001,
+      "perspective": 1,
+      "eyeMotion": "none",
+      "bodyMotion": "none"
+    },
+    "expression-16": {
+      "id": "expression-16",
+      "headX": -14.750781250000001,
+      "headY": -19.350000000000005,
+      "headZ": 5.631640624999998,
+      "widthLeft": 13.602343750000003,
+      "widthRight": 13.602343750000003,
+      "heightLeft": 36.63984375,
+      "heightRight": 36.63984375,
+      "spacing": 41.513281250000006,
+      "positionXLeft": 8,
+      "positionXRight": 8,
+      "positionYLeft": 25.613671875,
+      "positionYRight": 25.613671875,
+      "leftAngle": -20.6265625,
+      "rightAngle": 19.135546875,
+      "perspective": 1,
+      "eyeMotion": "none",
+      "bodyMotion": "none"
+    },
+    "expression-14": {
+      "id": "expression-14",
+      "headX": 3.5292968750000004,
+      "headY": -7.0765625,
+      "headZ": 9.830078125,
+      "widthLeft": 18.306250000000006,
+      "widthRight": 42.92421875000001,
+      "heightLeft": 47.281640624999994,
+      "heightRight": 10,
+      "spacing": 48.631640625,
+      "positionXLeft": 8,
+      "positionXRight": 8,
+      "positionYLeft": 25.613671875,
+      "positionYRight": 25.613671875,
+      "leftAngle": 6.980078125,
+      "rightAngle": -7.012890625000001,
+      "perspective": 1,
+      "eyeMotion": "none",
+      "bodyMotion": "none"
+    },
+    "expression-17": {
+      "id": "expression-17",
+      "headX": -4.3953125,
+      "headY": 14.07265625,
+      "headZ": -16.126171874999997,
+      "widthLeft": 13.045145681988203,
+      "widthRight": 13.045145681988203,
+      "heightLeft": 31.370703125000006,
+      "heightRight": 31.370703125000006,
+      "spacing": 38.14453125,
+      "positionXLeft": 8,
+      "positionXRight": 8,
+      "positionYLeft": 25.613671875,
+      "positionYRight": 25.613671875,
+      "leftAngle": 33.272265625,
+      "rightAngle": -27.262109375000005,
+      "perspective": 1,
+      "eyeMotion": "none",
+      "bodyMotion": "none"
+    },
+    "expression-05": {
+      "id": "expression-05",
+      "headX": -16.528515625,
+      "headY": -3.7679687499999996,
+      "headZ": -13.7296875,
+      "widthLeft": 17.090625000000003,
+      "widthRight": 43.924609375,
+      "heightLeft": 45.6796875,
+      "heightRight": 10,
+      "spacing": 42.713281249999994,
+      "positionXLeft": 8,
+      "positionXRight": 8,
+      "positionYLeft": 25.613671875,
+      "positionYRight": 25.613671875,
+      "leftAngle": 6.980078125,
+      "rightAngle": -7.012890625000001,
+      "perspective": 1,
+      "eyeMotion": "none",
+      "bodyMotion": "none"
+    },
+    "expression-15": {
+      "id": "expression-15",
+      "headX": 0.31914062500000184,
+      "headY": 35.307421874999996,
+      "headZ": -10.904296875,
+      "widthLeft": 16.4609375,
+      "widthRight": 16.4609375,
+      "heightLeft": 27.820703124999994,
+      "heightRight": 27.820703124999994,
+      "spacing": 40.31328125,
+      "positionXLeft": 8,
+      "positionXRight": 8,
+      "positionYLeft": 25.613671875,
+      "positionYRight": 25.613671875,
+      "leftAngle": 6.980078125,
+      "rightAngle": -7.012890625000001,
+      "perspective": 1,
+      "eyeMotion": "none",
+      "bodyMotion": "none"
+    },
+    "expression-09": {
+      "id": "expression-09",
+      "headX": -20.058203125,
+      "headY": 12.607421875,
+      "headZ": -12.7,
+      "widthLeft": 36.5,
+      "widthRight": 16.1,
+      "heightLeft": 29.799999999999997,
+      "heightRight": 10.200000000000003,
+      "spacing": 48.11328125,
+      "positionXLeft": 8,
+      "positionXRight": 8,
+      "positionYLeft": 25.613671875,
+      "positionYRight": 25.613671875,
+      "leftAngle": 6.980078125,
+      "rightAngle": -7.012890625000001,
+      "perspective": 1,
+      "eyeMotion": "none",
+      "bodyMotion": "none"
+    },
+    "expression-03": {
+      "id": "expression-03",
+      "headX": 2.9468749999999986,
+      "headY": -16.051171875,
+      "headZ": -20.916015625,
+      "widthLeft": 45.68336723153048,
+      "widthRight": 45.68336723153048,
+      "heightLeft": 39.74054108796297,
+      "heightRight": 39.74054108796297,
+      "spacing": 57.31328125,
+      "positionXLeft": 8,
+      "positionXRight": 8,
+      "positionYLeft": 25.613671875,
+      "positionYRight": 25.613671875,
+      "leftAngle": 6.980078125,
+      "rightAngle": -7.012890625000001,
+      "perspective": 1,
+      "eyeMotion": "none",
+      "bodyMotion": "none"
+    },
+    "expression-20": {
+      "id": "expression-20",
+      "headX": -17.127734375000003,
+      "headY": 18.070703124999998,
+      "headZ": 13.891796875,
+      "widthLeft": 29.452734375,
+      "widthRight": 29.452734375,
+      "heightLeft": 67.104296875,
+      "heightRight": 67.104296875,
+      "spacing": 57.213281249999994,
+      "positionXLeft": 8,
+      "positionXRight": 8,
+      "positionYLeft": 25.613671875,
+      "positionYRight": 25.613671875,
+      "leftAngle": 6.980078125,
+      "rightAngle": -7.012890625000001,
+      "perspective": 1,
+      "eyeMotion": "none",
+      "bodyMotion": "none"
+    },
+    "expression-12": {
+      "id": "expression-12",
+      "headX": -19.20859375,
+      "headY": 15.2,
+      "headZ": 11.8,
+      "widthLeft": 46.084765625,
+      "widthRight": 47.11410881916996,
+      "heightLeft": 39.46715970849806,
+      "heightRight": 40.18769994441695,
+      "spacing": 55.91328125,
+      "positionXLeft": 8,
+      "positionXRight": 8,
+      "positionYLeft": 25.613671875,
+      "positionYRight": 25.613671875,
+      "leftAngle": 6.980078125,
+      "rightAngle": -7.012890625000001,
+      "perspective": 1,
+      "eyeMotion": "none",
+      "bodyMotion": "none"
+    },
+    "expression-18": {
+      "id": "expression-18",
+      "headX": 6.585546875,
+      "headY": 4.737109375000001,
+      "headZ": 12.840234374999998,
+      "widthLeft": 36.1,
+      "widthRight": 16.200000000000003,
+      "heightLeft": 29.700000000000003,
+      "heightRight": 10.100000000000001,
+      "spacing": 46.81328125,
+      "positionXLeft": 8,
+      "positionXRight": 8,
+      "positionYLeft": 25.613671875,
+      "positionYRight": 25.613671875,
+      "leftAngle": 6.980078125,
+      "rightAngle": -7.012890625000001,
+      "perspective": 1,
+      "eyeMotion": "none",
+      "bodyMotion": "none"
+    },
+    "expression-07": {
+      "id": "expression-07",
+      "headX": 8.063671874999999,
+      "headY": 17.626562500000002,
+      "headZ": -11.116796874999999,
+      "widthLeft": 14.908203125,
+      "widthRight": 14.908203125,
+      "heightLeft": 28.400781249999994,
+      "heightRight": 28.400781249999994,
+      "spacing": 38.473046874999994,
+      "positionXLeft": 8,
+      "positionXRight": 8,
+      "positionYLeft": 25.613671875,
+      "positionYRight": 25.613671875,
+      "leftAngle": -23.885546875000003,
+      "rightAngle": 21.76875,
+      "perspective": 1,
+      "eyeMotion": "none",
+      "bodyMotion": "none"
+    },
+    "expression-11": {
+      "id": "expression-11",
+      "headX": -2.092968750000001,
+      "headY": -15.899609374999999,
+      "headZ": -14.469921875,
+      "widthLeft": 28.200867659732133,
+      "widthRight": 28.200867659732133,
+      "heightLeft": 73.330859375,
+      "heightRight": 71.17775668160692,
+      "spacing": 45.827734375000006,
+      "positionXLeft": 8,
+      "positionXRight": 8,
+      "positionYLeft": 25.613671875,
+      "positionYRight": 25.613671875,
+      "leftAngle": 6.980078125,
+      "rightAngle": -7.012890625000001,
+      "perspective": 1,
+      "eyeMotion": "none",
+      "bodyMotion": "none"
+    },
+    "expression-02": {
+      "id": "expression-02",
+      "headX": -15.287109375000002,
+      "headY": 15.006640625,
+      "headZ": 12.787890625,
+      "widthLeft": 25.25390625,
+      "widthRight": 25.25390625,
+      "heightLeft": 64.720703125,
+      "heightRight": 64.720703125,
+      "spacing": 55.11328125,
+      "positionXLeft": 8,
+      "positionXRight": 8,
+      "positionYLeft": 25.613671875,
+      "positionYRight": 25.613671875,
+      "leftAngle": 6.980078125,
+      "rightAngle": -7.012890625000001,
+      "perspective": 1,
+      "eyeMotion": "none",
+      "bodyMotion": "none"
+    },
+    "expression-21": {
+      "id": "expression-21",
+      "headX": -5.428125,
+      "headY": -11.71328125,
+      "headZ": -13.472265625000002,
+      "widthLeft": 45.400000000000006,
+      "widthRight": 44.5,
+      "heightLeft": 38.099999999999994,
+      "heightRight": 37.400000000000006,
+      "spacing": 55.41328125,
+      "positionXLeft": 8,
+      "positionXRight": 8,
+      "positionYLeft": 25.613671875,
+      "positionYRight": 25.613671875,
+      "leftAngle": 6.980078125,
+      "rightAngle": -7.012890625000001,
+      "perspective": 1,
+      "eyeMotion": "none",
+      "bodyMotion": "none"
+    },
+    "expression-23": {
+      "id": "expression-23",
+      "headX": -17.8,
+      "headY": 10,
+      "headZ": -10.894921875,
+      "widthLeft": 17.969921874999997,
+      "widthRight": 47.56328125,
+      "heightLeft": 43.892968749999994,
+      "heightRight": 10,
+      "spacing": 46.357031250000006,
+      "positionXLeft": 8,
+      "positionXRight": 8,
+      "positionYLeft": 15.813671875,
+      "positionYRight": 15.813671875,
+      "leftAngle": 6.980078125,
+      "rightAngle": -7.012890625000001,
+      "perspective": 1,
+      "eyeMotion": "none",
+      "bodyMotion": "none"
+    },
+    "expression-24": {
+      "id": "expression-24",
+      "headX": 7.131640624999998,
+      "headY": 7.7828124999999995,
+      "headZ": 3.935546874999999,
+      "widthLeft": 15.5,
+      "widthRight": 17.200000000000003,
+      "heightLeft": 20,
+      "heightRight": 21.5,
+      "spacing": 37.61328125,
+      "positionXLeft": 8,
+      "positionXRight": 8,
+      "positionYLeft": 65.613671875,
+      "positionYRight": 65.613671875,
+      "leftAngle": 6.980078125,
+      "rightAngle": -7.012890625000001,
+      "perspective": 1,
+      "eyeMotion": "none",
+      "bodyMotion": "none"
+    }
+  },
+  "surface": {
+    "type": "cone",
+    "width": 250,
+    "height": 182.006640625,
+    "depth": 225,
+    "roundness": 0,
+    "morphRoundness": 1.2003515624999999,
+    "tipRoundness": 2,
+    "baseRoundness": 2
+  },
+  "expressionFields": [
+    "headX",
+    "headY",
+    "headZ",
+    "widthLeft",
+    "widthRight",
+    "heightLeft",
+    "heightRight",
+    "spacing",
+    "positionXLeft",
+    "positionXRight",
+    "positionYLeft",
+    "positionYRight",
+    "leftAngle",
+    "rightAngle",
+    "perspective"
+  ]
+}

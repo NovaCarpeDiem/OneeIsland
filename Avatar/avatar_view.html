@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: transparent !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #avatar-host {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #avatar-host svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      filter: drop-shadow(0 2px 8px rgba(0,0,0,0.35));
+    }
+  </style>
+</head>
+<body>
+  <div id="avatar-host"></div>
+
+  <script type="module">
+    import { createAvatar, availableAnimations, DATA } from './avatar.js';
+
+    let currentAvatar = null;
+    let currentColor = '#6c63ff';
+    let currentAnim = 'idle';
+
+    // Hook to allow changing base body color dynamically
+    window.__setAvatarColor = function(colorHex, eyesHex) {
+      if (colorHex) {
+        currentColor = colorHex;
+        if (DATA && DATA.avatar && DATA.avatar.colors) {
+          DATA.avatar.colors.body = colorHex;
+        }
+      }
+      if (eyesHex && DATA && DATA.avatar && DATA.avatar.colors) {
+        DATA.avatar.colors.eyes = eyesHex;
+      }
+
+      // Re-trigger current animation frame or play
+      if (currentAvatar) {
+        try {
+          const anim = currentAvatar.animation || 'idle';
+          currentAvatar.play(anim);
+        } catch (e) {
+          console.warn('Error refreshing avatar color:', e);
+        }
+      }
+    };
+
+    window.__playAnimation = function(animName) {
+      if (!currentAvatar) return;
+      try {
+        currentAnim = animName;
+        currentAvatar.play(animName);
+      } catch (e) {
+        console.warn('Unknown or failed animation:', animName, e);
+      }
+    };
+
+    window.__getAvailableAnimations = function() {
+      return availableAnimations;
+    };
+
+    function init() {
+      try {
+        currentAvatar = createAvatar('#avatar-host', {
+          size: '100%',
+          animation: 'idle',
+          autoplay: true
+        });
+
+        // Inform C# that avatar is ready
+        if (window.chrome && window.chrome.webview) {
+          window.chrome.webview.postMessage({ type: 'ready', animations: availableAnimations });
+        }
+      } catch (err) {
+        console.error('Avatar init error:', err);
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+
+    // Message handler from C# WebView2
+    if (window.chrome && window.chrome.webview) {
+      window.chrome.webview.addEventListener('message', event => {
+        const msg = event.data;
+        if (!msg) return;
+        if (msg.type === 'play') {
+          window.__playAnimation(msg.animation);
+        } else if (msg.type === 'setColor') {
+          window.__setAvatarColor(msg.color, msg.eyesColor);
+        }
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,2434 @@
+<Window x:Class="DynamicIslandWin.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Dynamic Island Windows"
+        Icon="app.ico"
+        Width="710" Height="228"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ShowInTaskbar="False"
+        ResizeMode="NoResize"
+        WindowStartupLocation="Manual"
+        RenderOptions.BitmapScalingMode="LowQuality"
+        RenderOptions.EdgeMode="Unspecified">
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="DynamicAvatarBodyBrush" Color="#F43F5E" />
+        <!-- Adaptive Glassmorphic Card Style inside expanded view -->
+        <Style x:Key="StatCardBorder" TargetType="Border">
+            <Setter Property="Background" Value="#E20A0D18" />
+            <Setter Property="BorderBrush" Value="{DynamicResource DynamicAccentSoftBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="20" />
+            <Setter Property="Padding" Value="12,9" />
+        </Style>
+
+        <!-- Modern Flat ScrollBar Style for trays and clipboards -->
+        <Style TargetType="{x:Type ScrollViewer}">
+            <Setter Property="PanningMode" Value="Both" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ScrollViewer}">
+                        <Grid>
+                            <ScrollContentPresenter />
+                            <ScrollBar x:Name="PART_VerticalScrollBar"
+                                       HorizontalAlignment="Right"
+                                       Width="4"
+                                       Opacity="0.4"
+                                       Value="{TemplateBinding VerticalOffset}"
+                                       Maximum="{TemplateBinding ScrollableHeight}"
+                                       ViewportSize="{TemplateBinding ViewportHeight}"
+                                       Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Width="710" Height="228" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,0,0,0">
+        <!-- Main Island Container (Animates Width, Height, CornerRadius at 144Hz without shader stalls) -->
+        <Border x:Name="IslandContainer"
+                HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,11,0,0"
+                Width="356" Height="42"
+                CornerRadius="21"
+                BorderThickness="1.3"
+                SizeChanged="IslandContainer_SizeChanged"
+                MouseEnter="IslandContainer_MouseEnter"
+                MouseLeave="IslandContainer_MouseLeave"
+                MouseLeftButtonDown="IslandContainer_MouseLeftButtonDown"
+                MouseLeftButtonUp="IslandContainer_MouseLeftButtonUp"
+                MouseMove="IslandContainer_MouseMove"
+                PreviewMouseRightButtonDown="IslandContainer_PreviewMouseRightButtonDown"
+                MouseRightButtonUp="IslandContainer_MouseRightButtonUp"
+                PreviewMouseWheel="IslandContainer_PreviewMouseWheel"
+                AllowDrop="True"
+                DragEnter="IslandContainer_DragEnter"
+                DragLeave="IslandContainer_DragLeave"
+                Drop="IslandContainer_Drop"
+                ToolTip="İpucu: Sağa/Sola sürükleyebilirsiniz • Sağ Tık: Avatar Mini Mod"
+                RenderTransformOrigin="0.5,0.5"
+                ClipToBounds="False">
+            <Border.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform x:Name="IslandContainerScale" ScaleX="1.0" ScaleY="1.0" />
+                    <TranslateTransform x:Name="IslandContainerTranslate" X="0" Y="0" />
+                </TransformGroup>
+            </Border.RenderTransform>
+            <Border.Background>
+                <!-- Deep Obsidian-Glass Background (Coucou & Apple hardware match) -->
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop x:Name="IslandBgAccentStop" Color="#FF060811" Offset="0.0" />
+                    <GradientStop x:Name="IslandBgMidStop" Color="#FF0A0E1A" Offset="0.55" />
+                    <GradientStop Color="#FF060812" Offset="1.0" />
+                </LinearGradientBrush>
+            </Border.Background>
+            <Border.BorderBrush>
+                <!-- 360-Degree Luminous Adaptive Liquid Neon Rim Border (Master Panel 1 Aura) -->
+                <LinearGradientBrush x:Name="IslandNeonLiquidRimBrush" StartPoint="0,1" EndPoint="1,0">
+                    <GradientStop x:Name="IslandBorderAccentStop" Color="#F43F5E" Offset="0.0" />
+                    <GradientStop x:Name="IslandBorderMidStop" Color="#8B5CF6" Offset="0.45" />
+                    <GradientStop x:Name="IslandBorderTopStop" Color="#06B6D4" Offset="1.0" />
+                </LinearGradientBrush>
+            </Border.BorderBrush>
+
+            <Grid x:Name="IslandHostGrid" ClipToBounds="False">
+                <!-- Left Notch Ear (Hidden in floating island mode) -->
+                <Path x:Name="NotchLeftEar" Visibility="Collapsed"
+                      HorizontalAlignment="Left" VerticalAlignment="Top"
+                      Margin="-16,0,0,0" Width="17" Height="17"
+                      Data="M 0,0 C 9.5,0 17,7.5 17,17 L 17,0 Z"
+                      Fill="#FA060811"
+                      IsHitTestVisible="False">
+                    <Path.Effect>
+                        <DropShadowEffect x:Name="LeftEarGlowEffect" BlurRadius="0" ShadowDepth="0" Color="Transparent" Opacity="0" />
+                    </Path.Effect>
+                </Path>
+                <Path x:Name="NotchLeftEarRim" Visibility="Collapsed"
+                      HorizontalAlignment="Left" VerticalAlignment="Top"
+                      Margin="-16,0,0,0" Width="17" Height="17"
+                      Data="M 0,0 C 9.5,0 17,7.5 17,17"
+                      Stroke="{DynamicResource DynamicAccentSoftBrush}" StrokeThickness="1.2"
+                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                      IsHitTestVisible="False" />
+
+                <!-- Right Notch Ear (Hidden in floating island mode) -->
+                <Path x:Name="NotchRightEar" Visibility="Collapsed"
+                      HorizontalAlignment="Right" VerticalAlignment="Top"
+                      Margin="0,0,-16,0" Width="17" Height="17"
+                      Data="M 17,0 C 7.5,0 0,7.5 0,17 L 0,0 Z"
+                      Fill="#FA060812"
+                      IsHitTestVisible="False">
+                    <Path.Effect>
+                        <DropShadowEffect x:Name="RightEarGlowEffect" BlurRadius="0" ShadowDepth="0" Color="Transparent" Opacity="0" />
+                    </Path.Effect>
+                </Path>
+                <Path x:Name="NotchRightEarRim" Visibility="Collapsed"
+                      HorizontalAlignment="Right" VerticalAlignment="Top"
+                      Margin="0,0,-16,0" Width="17" Height="17"
+                      Data="M 17,0 C 7.5,0 0,7.5 0,17"
+                      Stroke="{DynamicResource DynamicAccentSoftBrush}" StrokeThickness="1.2"
+                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                      IsHitTestVisible="False" />
+
+                <!-- Atmospheric Weather: Rain Drops Falling from Notch Ears -->
+                <Canvas x:Name="NotchRainCanvas" IsHitTestVisible="False" Visibility="Collapsed" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="40">
+                    <Border x:Name="RainDropLeft" Width="2" Height="7" CornerRadius="1"
+                            Background="#9038BDF8" Canvas.Left="-8" Canvas.Top="8" Opacity="0">
+                        <Border.RenderTransform>
+                            <TranslateTransform x:Name="RainDropLeftTranslate" Y="0" />
+                        </Border.RenderTransform>
+                    </Border>
+                    <Border x:Name="RainDropRight" Width="2" Height="7" CornerRadius="1"
+                            Background="#9038BDF8" Canvas.Right="-8" Canvas.Top="8" Opacity="0">
+                        <Border.RenderTransform>
+                            <TranslateTransform x:Name="RainDropRightTranslate" Y="0" />
+                        </Border.RenderTransform>
+                    </Border>
+                </Canvas>
+
+                <Grid x:Name="IslandContentGrid">
+                    <!-- True Rounded Geometry Clip so NO glow or image ever bleeds outside the island corners -->
+                    <Grid.Clip>
+                        <RectangleGeometry x:Name="IslandClipGeometry" Rect="0,0,353.4,39.4" RadiusX="19.8" RadiusY="19.8" />
+                    </Grid.Clip>
+
+                    <!-- Volumetric Center Stage Spotlight (Hidden in floating island mode) -->
+                    <Ellipse x:Name="NotchVolumetricGlow" Visibility="Collapsed"
+                             Width="180" Height="140"
+                             HorizontalAlignment="Center" VerticalAlignment="Center"
+                             Margin="0,-10,0,0"
+                             IsHitTestVisible="False"
+                             Opacity="0.85">
+                        <Ellipse.Fill>
+                            <RadialGradientBrush Center="0.5,0.5" GradientOrigin="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
+                                <GradientStop x:Name="StageGlowCoreStop" Color="#80F43F5E" Offset="0.0" />
+                                <GradientStop x:Name="StageGlowMidStop" Color="#25F43F5E" Offset="0.45" />
+                                <GradientStop Color="#00000000" Offset="1.0" />
+                            </RadialGradientBrush>
+                        </Ellipse.Fill>
+                        <Ellipse.Effect>
+                            <BlurEffect Radius="24" KernelType="Gaussian" />
+                        </Ellipse.Effect>
+                    </Ellipse>
+
+                    <!-- Liquid Color Wave Shimmer (Flows from Left Ear to Right Ear on Song Change) -->
+                    <Rectangle x:Name="LiquidColorWave"
+                               HorizontalAlignment="Left" VerticalAlignment="Stretch"
+                               Width="160"
+                               Panel.ZIndex="99"
+                               IsHitTestVisible="False" Opacity="0">
+                        <Rectangle.Fill>
+                            <LinearGradientBrush x:Name="LiquidWaveBrush" StartPoint="0,0.5" EndPoint="1,0.5">
+                                <GradientStop Color="#00FFFFFF" Offset="0.0" />
+                                <GradientStop x:Name="WaveStopCore" Color="#C0F43F5E" Offset="0.5" />
+                                <GradientStop Color="#00FFFFFF" Offset="1.0" />
+                            </LinearGradientBrush>
+                        </Rectangle.Fill>
+                        <Rectangle.RenderTransform>
+                            <TranslateTransform x:Name="LiquidWaveTranslate" X="-180" />
+                        </Rectangle.RenderTransform>
+                    </Rectangle>
+
+                    <!-- Bezel Volume Indicator Bar (Directly on the bottom rim of the notch) -->
+                    <Border x:Name="NotchBottomVolumeBar"
+                            HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
+                            Height="5" Margin="26,0,26,2"
+                            CornerRadius="2.5"
+                            Background="#28FFFFFF"
+                            Panel.ZIndex="100"
+                            Visibility="Collapsed" Opacity="0"
+                            IsHitTestVisible="False">
+                        <Grid>
+                            <Border x:Name="NotchBottomVolumeFill"
+                                    HorizontalAlignment="Left" VerticalAlignment="Stretch"
+                                    Width="100" CornerRadius="2.5"
+                                    Background="{DynamicResource DynamicAccentBrush}">
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="8" ShadowDepth="0" Color="#E11D48" Opacity="0.85" />
+                                </Border.Effect>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                <!-- Primary Bottom-Left Adaptive Radial Glow (Clipped to exact CornerRadius) -->
+                <Border IsHitTestVisible="False" CornerRadius="{Binding CornerRadius, ElementName=IslandContainer}">
+                    <Border.Background>
+                        <RadialGradientBrush Center="0.22,0.95" GradientOrigin="0.22,0.95" RadiusX="0.55" RadiusY="0.82">
+                            <GradientStop x:Name="AmbientGlowStop" Color="#38E11D48" Offset="0.0" />
+                            <GradientStop x:Name="AmbientGlowMidStop" Color="#14E11D48" Offset="0.55" />
+                            <GradientStop Color="#00000000" Offset="1.0" />
+                        </RadialGradientBrush>
+                    </Border.Background>
+                </Border>
+
+                <!-- Secondary Top-Right Adaptive Radial Glow (Clipped to exact CornerRadius) -->
+                <Border IsHitTestVisible="False" CornerRadius="{Binding CornerRadius, ElementName=IslandContainer}">
+                    <Border.Background>
+                        <RadialGradientBrush Center="0.82,0.12" GradientOrigin="0.82,0.12" RadiusX="0.45" RadiusY="0.68">
+                            <GradientStop x:Name="AmbientGlowTopRightStop" Color="#24FB7185" Offset="0.0" />
+                            <GradientStop Color="#00000000" Offset="1.0" />
+                        </RadialGradientBrush>
+                    </Border.Background>
+                </Border>
+
+                <!-- ============================================================== -->
+                <!-- 1. COLLAPSED VIEW (Floating Dynamic Island Pill 338x42)         -->
+                <!-- ============================================================== -->
+                <Grid x:Name="CollapsedView" Width="346" Height="42" HorizontalAlignment="Center" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5">
+                    <Grid.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform x:Name="CollapsedViewScale" ScaleX="1.0" ScaleY="1.0" />
+                            <TranslateTransform x:Name="CollapsedViewTranslate" X="0" Y="0" />
+                        </TransformGroup>
+                    </Grid.RenderTransform>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left: Avatar / Circular Album Art / Status Orb -->
+                    <StackPanel x:Name="CollapsedLeftPanel" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <!-- Mini Interactive Onee Avatar (Pure Vector WPF) -->
+                        <Border x:Name="MiniAvatarHostBorder"
+                                Width="30" Height="30"
+                                CornerRadius="15"
+                                Background="#10FFFFFF"
+                                BorderBrush="{DynamicResource DynamicAccentSoftBrush}"
+                                BorderThickness="1.2"
+                                Margin="0,0,6,0"
+                                Cursor="Hand"
+                                ToolTip="Onee Avatar Lab (Tıklayarak Duygu/Animasyon Değiştir)"
+                                MouseLeftButtonUp="MiniAvatar_MouseLeftButtonUp"
+                                MouseEnter="MiniAvatar_MouseEnter"
+                                MouseLeave="MiniAvatar_MouseLeave">
+                            <Grid ClipToBounds="True">
+                                <Viewbox x:Name="MiniAvatarViewbox" Width="24" Height="24" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                                    <Viewbox.RenderTransform>
+                                        <TransformGroup>
+                                            <TranslateTransform x:Name="NormalIslandAvatarBobTranslate" X="0" Y="0" />
+                                            <RotateTransform x:Name="NormalIslandAvatarBobRotate" Angle="0" />
+                                        </TransformGroup>
+                                    </Viewbox.RenderTransform>
+                                    <Canvas Width="300" Height="300">
+                                        <Canvas.RenderTransform>
+                                            <TranslateTransform X="150" Y="150" />
+                                        </Canvas.RenderTransform>
+                                        <!-- Head Base Path: Adaptive Porcelain 3D Body -->
+                                        <Path x:Name="MiniAvatarHeadPath" Fill="{DynamicResource DynamicAvatarBodyBrush}" />
+                                        <!-- Left Eye Path with Eye Tracking -->
+                                        <Path x:Name="MiniAvatarLeftEyePath" Fill="#111316">
+                                            <Path.RenderTransform>
+                                                <TranslateTransform x:Name="NormalIslandLeftEyeTrack" X="0" Y="0" />
+                                            </Path.RenderTransform>
+                                        </Path>
+                                        <!-- Right Eye Path with Eye Tracking -->
+                                        <Path x:Name="MiniAvatarRightEyePath" Fill="#111316">
+                                            <Path.RenderTransform>
+                                                <TranslateTransform x:Name="NormalIslandRightEyeTrack" X="0" Y="0" />
+                                            </Path.RenderTransform>
+                                        </Path>
+
+                                        <!-- Onee Soft Marshmallow Left Paw -->
+                                        <Path x:Name="OneeLeftHand"
+                                              Data="M -15,0 C -15,-10 15,-10 15,0 C 15,10 -15,10 -15,0 Z"
+                                              Fill="{DynamicResource DynamicAvatarBodyBrush}"
+                                              Stroke="#25000000" StrokeThickness="1.2"
+                                              Canvas.Left="-46" Canvas.Top="60">
+                                            <Path.RenderTransform>
+                                                <TranslateTransform x:Name="OneeLeftHandTranslate" X="0" Y="0" />
+                                            </Path.RenderTransform>
+                                        </Path>
+
+                                        <!-- Onee Soft Marshmallow Right Paw -->
+                                        <Path x:Name="OneeRightHand"
+                                              Data="M -15,0 C -15,-10 15,-10 15,0 C 15,10 -15,10 -15,0 Z"
+                                              Fill="{DynamicResource DynamicAvatarBodyBrush}"
+                                              Stroke="#25000000" StrokeThickness="1.2"
+                                              Canvas.Left="46" Canvas.Top="60">
+                                            <Path.RenderTransform>
+                                                <TranslateTransform x:Name="OneeRightHandTranslate" X="0" Y="0" />
+                                            </Path.RenderTransform>
+                                        </Path>
+
+                                        <!-- Onee Expressive Openable Mouth -->
+                                        <Canvas Canvas.Left="0" Canvas.Top="58" IsHitTestVisible="False">
+                                            <Canvas.RenderTransform>
+                                                <ScaleTransform x:Name="OneeNormalMouthScale" ScaleX="0" ScaleY="0" CenterX="0" CenterY="0" />
+                                            </Canvas.RenderTransform>
+                                            <Path x:Name="OneeNormalMouth"
+                                                  Data="M -14,0 C -14,18 14,18 14,0 C 14,-2 -14,-2 -14,0 Z"
+                                                  Fill="#28111A" Stroke="#20000000" StrokeThickness="1" />
+                                            <Path x:Name="OneeNormalTongue"
+                                                  Data="M -8,7 C -8,16 8,16 8,7 C 8,5 -8,5 -8,7 Z"
+                                                  Fill="#FF6584" />
+                                        </Canvas>
+
+                                        <!-- Petting Floating Heart Particle -->
+                                        <Path x:Name="PetHeartParticle"
+                                              Data="M 12,21.35 L 10.55,20.03 C 5.4,15.36 2,12.28 2,8.5 C 2,5.42 4.42,3 7.5,3 C 9.24,3 10.91,3.81 12,5.09 C 13.09,3.81 14.76,3 16.5,3 C 19.58,3 22,5.42 22,8.5 C 22,12.28 18.6,15.36 13.45,20.04 L 12,21.35 Z"
+                                              Fill="#FF2E93"
+                                              Width="24" Height="24" Stretch="Uniform"
+                                              Canvas.Left="35" Canvas.Top="-65"
+                                              Opacity="0" IsHitTestVisible="False">
+                                            <Path.RenderTransform>
+                                                <TranslateTransform x:Name="PetHeartTranslate" X="0" Y="0" />
+                                            </Path.RenderTransform>
+                                        </Path>
+
+                                        <!-- Onee Sleep & Thought Badge (...) -->
+                                        <Border x:Name="OneeThoughtBadge"
+                                                Canvas.Left="-30" Canvas.Top="-112"
+                                                Width="60" Height="24" CornerRadius="12"
+                                                Background="#E00B0E17"
+                                                BorderBrush="{DynamicResource DynamicAccentSoftBrush}"
+                                                BorderThickness="1.5"
+                                                Visibility="Collapsed" Opacity="0"
+                                                IsHitTestVisible="False">
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <Ellipse Width="4.5" Height="4.5" Fill="{DynamicResource DynamicAccentBrush}" Margin="2,0" />
+                                                <Ellipse Width="4.5" Height="4.5" Fill="{DynamicResource DynamicAccentBrush}" Margin="2,0" />
+                                                <Ellipse Width="4.5" Height="4.5" Fill="{DynamicResource DynamicAccentBrush}" Margin="2,0" />
+                                            </StackPanel>
+                                        </Border>
+
+                                        <!-- DJ Headphone Accessory (Appears when music is playing) -->
+                                        <Canvas x:Name="NormalIslandHeadphones" Opacity="0" IsHitTestVisible="False">
+                                            <Path Data="M -94,6 C -94,-96 94,-96 94,6"
+                                                  Stroke="#181C26" StrokeThickness="11" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                                            <Path Data="M -78,-26 C -78,-90 78,-90 78,-26"
+                                                  Stroke="#0C0E14" StrokeThickness="5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                                            <Path Data="M -74,-42 C -74,-99 74,-99 74,-42"
+                                                  Stroke="{DynamicResource DynamicAccentBrush}" StrokeThickness="2.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                                            <Rectangle Canvas.Left="-100" Canvas.Top="4" Width="8" Height="10" RadiusX="3" RadiusY="3" Fill="#64748B" />
+                                            <Border Canvas.Left="-118" Canvas.Top="12" Width="26" Height="48" CornerRadius="13"
+                                                    Background="#181C26" BorderBrush="{DynamicResource DynamicAccentBrush}" BorderThickness="2.2">
+                                                <Border.RenderTransform>
+                                                    <RotateTransform Angle="12" CenterX="13" CenterY="24" />
+                                                </Border.RenderTransform>
+                                                <Grid>
+                                                    <Border Width="16" Height="36" CornerRadius="8" Background="#0C0E14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                    <Ellipse Width="6" Height="6" Fill="{DynamicResource DynamicAccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Grid>
+                                            </Border>
+                                            <Rectangle Canvas.Left="92" Canvas.Top="4" Width="8" Height="10" RadiusX="3" RadiusY="3" Fill="#64748B" />
+                                            <Border Canvas.Left="92" Canvas.Top="12" Width="26" Height="48" CornerRadius="13"
+                                                    Background="#181C26" BorderBrush="{DynamicResource DynamicAccentBrush}" BorderThickness="2.2">
+                                                <Border.RenderTransform>
+                                                    <RotateTransform Angle="-12" CenterX="13" CenterY="24" />
+                                                </Border.RenderTransform>
+                                                <Grid>
+                                                    <Border Width="16" Height="36" CornerRadius="8" Background="#0C0E14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                    <Ellipse Width="6" Height="6" Fill="{DynamicResource DynamicAccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Grid>
+                                            </Border>
+                                        </Canvas>
+                                    </Canvas>
+                                </Viewbox>
+                            </Grid>
+                        </Border>
+
+                        <!-- Mini Album Thumbnail with Adaptive Ring & True Circular Fill (Zero Corner Bleed) -->
+                        <Border x:Name="MiniThumbBorder" Width="28" Height="28" CornerRadius="14" BorderBrush="{DynamicResource DynamicAccentBorderBrush}" BorderThickness="1.3" Margin="0,0,8,0" Visibility="Collapsed">
+                            <Grid>
+                                <Image x:Name="MiniThumbImage" Visibility="Collapsed" />
+                                <Ellipse Width="25.4" Height="25.4" HorizontalAlignment="Center" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality">
+                                    <Ellipse.Fill>
+                                        <ImageBrush x:Name="MiniThumbBrush" Stretch="UniformToFill" />
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                            </Grid>
+                        </Border>
+
+                        <!-- Idle Adaptive Glowing Orb (Zero-shader halo) -->
+                        <Grid x:Name="MiniStatusDot" Width="14" Height="14" Margin="2,0,6,0" VerticalAlignment="Center" Cursor="Hand" MouseLeftButtonUp="MiniStatusDot_Click" ToolTip="Sonraki Sekme Rengine Geç (Tıklayın)">
+                            <Ellipse x:Name="MiniStatusHalo" Width="14" Height="14" Fill="#34F43F5E" />
+                            <Ellipse x:Name="MiniStatusCore" Width="7" Height="7" Fill="#F43F5E" />
+                        </Grid>
+
+                        <!-- Microphone Indicator Removed/Hidden per user request -->
+                        <Border x:Name="MiniMicBorder" Visibility="Collapsed" Width="0" Height="0">
+                            <StackPanel>
+                                <Ellipse x:Name="MiniMicDot" />
+                                <TextBlock x:Name="MiniMicText" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Center: Two-Line Song Title & Artist Name (When Playing) OR Clock/Timer (When Idle) -->
+                    <Grid Grid.Column="1" VerticalAlignment="Center" Margin="2,0,5,0">
+                        <!-- Dedicated Song Title + Artist Stack -->
+                        <StackPanel x:Name="MiniMediaInfoPanel" VerticalAlignment="Center" Visibility="Collapsed">
+                            <TextBlock x:Name="MiniTrackTitleText"
+                                       Text="Şarkı Adı"
+                                       Foreground="#FFFFFF"
+                                       FontSize="11.5"
+                                       FontWeight="Bold"
+                                       TextTrimming="CharacterEllipsis"
+                                       TextWrapping="NoWrap" />
+                            <TextBlock x:Name="MiniTrackArtistText"
+                                       Text="Sanatçı"
+                                       Foreground="#94A3B8"
+                                       FontSize="10"
+                                       FontWeight="Medium"
+                                       Margin="0,-1,0,0"
+                                       TextTrimming="CharacterEllipsis"
+                                       TextWrapping="NoWrap" />
+                        </StackPanel>
+
+                        <!-- Idle Clock / Date / Pomodoro Text Container -->
+                        <Grid x:Name="CollapsedCenterGrid" VerticalAlignment="Center">
+                            <TextBlock x:Name="MiniCenterText"
+                                       Text="21:28"
+                                       Foreground="#FFFFFF"
+                                       FontSize="11.5"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis"
+                                       TextWrapping="NoWrap" />
+                        </Grid>
+                    </Grid>
+
+                    <!-- Right: Animated Equalizer + Status Capsules -->
+                    <StackPanel x:Name="CollapsedRightPanel" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                        <!-- Equalizer Animation Bars (Positioned on the right like real Dynamic Island) -->
+                        <StackPanel x:Name="EqualizerPanel" Orientation="Horizontal" VerticalAlignment="Center" Height="15" Margin="0,0,6,0" Visibility="Collapsed">
+                            <StackPanel.Triggers>
+                                <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True" Timeline.DesiredFrameRate="60">
+                                            <DoubleAnimation Storyboard.TargetName="EqBar1Scale" Storyboard.TargetProperty="ScaleY" From="0.35" To="1.0" Duration="0:0:0.35" />
+                                            <DoubleAnimation Storyboard.TargetName="EqBar2Scale" Storyboard.TargetProperty="ScaleY" From="1.0" To="0.40" Duration="0:0:0.42" />
+                                            <DoubleAnimation Storyboard.TargetName="EqBar3Scale" Storyboard.TargetProperty="ScaleY" From="0.42" To="0.92" Duration="0:0:0.30" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </StackPanel.Triggers>
+                            <Rectangle x:Name="EqBar1" Width="3" Height="14" Fill="#F43F5E" RadiusX="1.5" RadiusY="1.5" Margin="1,0" RenderTransformOrigin="0.5,1.0">
+                                <Rectangle.RenderTransform>
+                                    <ScaleTransform x:Name="EqBar1Scale" ScaleY="0.6" />
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle x:Name="EqBar2" Width="3" Height="14" Fill="#FB7185" RadiusX="1.5" RadiusY="1.5" Margin="1,0" RenderTransformOrigin="0.5,1.0">
+                                <Rectangle.RenderTransform>
+                                    <ScaleTransform x:Name="EqBar2Scale" ScaleY="0.9" />
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle x:Name="EqBar3" Width="3" Height="14" Fill="#FDA4AF" RadiusX="1.5" RadiusY="1.5" Margin="1,0" RenderTransformOrigin="0.5,1.0">
+                                <Rectangle.RenderTransform>
+                                    <ScaleTransform x:Name="EqBar3Scale" ScaleY="0.7" />
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                        </StackPanel>
+
+                        <!-- Mini Live Download Badge (Auto-shown when idle & downloading > 250 KB/s) -->
+                        <Border x:Name="MiniNetBorder" Background="#CC0B1120" BorderBrush="{DynamicResource DynamicAccentBorderBrush}" BorderThickness="1" CornerRadius="10" Padding="4.5,1.5" Margin="0,0,2.5,0" Visibility="Collapsed">
+                            <TextBlock x:Name="MiniNetText" Text="↓ 0 MB/s" Foreground="#38BDF8" FontSize="9.5" FontWeight="SemiBold" />
+                        </Border>
+
+                        <!-- Mini Weather Badge -->
+                        <Border x:Name="MiniWeatherBorder" Background="#CC0B0E1A" BorderBrush="#26FFFFFF" BorderThickness="1" CornerRadius="10" Padding="4.5,1.5" Margin="0,0,2.5,0" Visibility="Collapsed">
+                            <TextBlock x:Name="MiniWeatherText" Text="🌤️ 21°C" Foreground="#FDE047" FontSize="9.5" FontWeight="Medium" />
+                        </Border>
+
+                        <!-- Mini Volume Badge -->
+                        <Border x:Name="MiniVolBorder" Background="#CC0B0E1A" BorderBrush="#26FFFFFF" BorderThickness="1" CornerRadius="10" Padding="4.5,1.5" Margin="0,0,2.5,0">
+                            <TextBlock x:Name="MiniVolText" Text="🔊 50%" Foreground="#E4E4E7" FontSize="9.5" FontWeight="Medium" />
+                        </Border>
+
+                        <!-- Mini Battery / AC Badge (Adaptive Accent Border) -->
+                        <Border x:Name="MiniBatteryBorder" Background="#CC0B0E1A" BorderBrush="{DynamicResource DynamicAccentSoftBrush}" BorderThickness="1" CornerRadius="10" Padding="4.5,1.5">
+                            <TextBlock x:Name="MiniBatteryText" Text="⚡ 100%" Foreground="#00E5A3" FontSize="9.5" FontWeight="SemiBold" />
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Hidden Compatibility Dummy Elements for Code-Behind -->
+                    <Grid Visibility="Collapsed" Width="0" Height="0" IsHitTestVisible="False">
+                        <Button x:Name="MiniHeartBtn" Click="MiniHeartBtn_Click" />
+                        <Path x:Name="MiniHeartPath" />
+                        <Slider x:Name="MiniVolumeSlider" ValueChanged="MiniVolumeSlider_ValueChanged" />
+                        <Grid x:Name="OneeNightSleepIndicator" />
+                        <Ellipse x:Name="MochiStageSpotlight">
+                            <Ellipse.Fill>
+                                <RadialGradientBrush>
+                                    <GradientStop x:Name="MochiSpotlightColorStop" />
+                                </RadialGradientBrush>
+                            </Ellipse.Fill>
+                        </Ellipse>
+                        <Button x:Name="PillHomeBtn" Click="PillHome_Click" />
+                        <Button x:Name="PillChatBtn" Click="PillChat_Click" />
+                        <Button x:Name="PillDesktopBtn" Click="PillDesktop_Click" />
+                        <Button x:Name="PillSleepBtn" Click="PillSleep_Click" />
+                        <Button x:Name="PillExpandBtn" Click="PillExpand_Click" />
+                        <Button x:Name="MiniPrevBtn" Click="PrevTrack_Click" />
+                        <Button x:Name="MiniPlayPauseBtn" Click="PlayPause_Click" />
+                        <Path x:Name="MiniPlayPausePath" />
+                        <Button x:Name="MiniNextBtn" Click="NextTrack_Click" />
+                    </Grid>
+                </Grid>
+
+                <!-- ============================================================== -->
+                <!-- 3. AVATAR MINI MODE VIEW (Dedicated Floating Avatar Bubble)    -->
+                <!-- ============================================================== -->
+                <Grid x:Name="AvatarMiniModeView"
+                      Width="58" Height="58"
+                      HorizontalAlignment="Center" VerticalAlignment="Center"
+                      Visibility="Collapsed"
+                      Opacity="0"
+                      Cursor="Hand"
+                      Background="Transparent"
+                      MouseEnter="AvatarMiniMode_MouseEnter"
+                      MouseLeave="AvatarMiniMode_MouseLeave"
+                      MouseMove="AvatarMiniMode_MouseMove"
+                      MouseLeftButtonUp="AvatarMiniMode_MouseLeftButtonUp"
+                      MouseRightButtonUp="AvatarMiniMode_MouseRightButtonUp"
+                      ToolTip="Onee Avatar • Normal ada moduna dönmek için tıklayın">
+
+                    <!-- Luminous Particle Aura Rays (Matches master reference \ | / burst) -->
+                    <Canvas x:Name="AvatarMiniAuraCanvas"
+                            Width="58" Height="58"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Opacity="0"
+                            IsHitTestVisible="False">
+                        <!-- Top-Left Ray -->
+                        <Line X1="20" Y1="10" X2="14" Y2="3" Stroke="{DynamicResource DynamicAccentBrush}" StrokeThickness="2.2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                        <!-- Top-Center Ray -->
+                        <Line X1="29" Y1="8" X2="29" Y2="1" Stroke="{DynamicResource DynamicAccentBrush}" StrokeThickness="2.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                        <!-- Top-Right Ray -->
+                        <Line X1="38" Y1="10" X2="44" Y2="3" Stroke="{DynamicResource DynamicAccentBrush}" StrokeThickness="2.2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                    </Canvas>
+
+                    <!-- Subtle Inner Glow / Ripple Ring (matches island aesthetics) -->
+                    <Ellipse x:Name="AvatarMiniHalo"
+                             Width="52" Height="52"
+                             HorizontalAlignment="Center" VerticalAlignment="Center"
+                             Fill="{DynamicResource DynamicAccentSoftBrush}"
+                             Opacity="0.55"
+                             IsHitTestVisible="False">
+                        <Ellipse.Effect>
+                            <BlurEffect Radius="10" KernelType="Gaussian" />
+                        </Ellipse.Effect>
+                    </Ellipse>
+
+                    <!-- Avatar Character Vector Host (Supports spring bounce, hover pop & rhythm dancing) -->
+                    <Grid x:Name="AvatarMiniHost"
+                          Width="52" Height="52"
+                          HorizontalAlignment="Center" VerticalAlignment="Center"
+                          RenderTransformOrigin="0.5,0.5"
+                          ClipToBounds="False">
+                        <Grid.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform x:Name="MiniBubbleHostScale" ScaleX="1.0" ScaleY="1.0" />
+                                <TranslateTransform x:Name="MiniBubbleHostBobTranslate" X="0" Y="0" />
+                                <RotateTransform x:Name="MiniBubbleHostBobRotate" Angle="0" />
+                            </TransformGroup>
+                        </Grid.RenderTransform>
+                        <Viewbox x:Name="AvatarMiniViewbox"
+                                 Width="42" Height="42"
+                                 Stretch="Uniform"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Canvas Width="300" Height="300">
+                                <Canvas.RenderTransform>
+                                    <TranslateTransform X="150" Y="150" />
+                                </Canvas.RenderTransform>
+                                <!-- Head Base Path: Adaptive Vibrant Color (dynamically adapts to background / media) -->
+                                <Path x:Name="MiniBubbleHeadPath" Fill="{DynamicResource DynamicAvatarBodyBrush}" />
+                                <!-- Left Eye Path with Interactive Eye Tracking -->
+                                <Path x:Name="MiniBubbleLeftEyePath" Fill="#111316">
+                                    <Path.RenderTransform>
+                                        <TranslateTransform x:Name="LeftEyeTrackTranslate" X="0" Y="0" />
+                                    </Path.RenderTransform>
+                                </Path>
+                                <!-- Right Eye Path with Interactive Eye Tracking -->
+                                <Path x:Name="MiniBubbleRightEyePath" Fill="#111316">
+                                    <Path.RenderTransform>
+                                        <TranslateTransform x:Name="RightEyeTrackTranslate" X="0" Y="0" />
+                                    </Path.RenderTransform>
+                                </Path>
+
+                                <!-- Mini Bubble Soft Marshmallow Left Paw -->
+                                <Path x:Name="MiniBubbleLeftHand"
+                                      Data="M -15,0 C -15,-10 15,-10 15,0 C 15,10 -15,10 -15,0 Z"
+                                      Fill="{DynamicResource DynamicAvatarBodyBrush}"
+                                      Stroke="#25000000" StrokeThickness="1.2"
+                                      Canvas.Left="-46" Canvas.Top="60">
+                                    <Path.RenderTransform>
+                                        <TranslateTransform x:Name="MiniBubbleLeftHandTranslate" X="0" Y="0" />
+                                    </Path.RenderTransform>
+                                </Path>
+
+                                <!-- Mini Bubble Soft Marshmallow Right Paw -->
+                                <Path x:Name="MiniBubbleRightHand"
+                                      Data="M -15,0 C -15,-10 15,-10 15,0 C 15,10 -15,10 -15,0 Z"
+                                      Fill="{DynamicResource DynamicAvatarBodyBrush}"
+                                      Stroke="#25000000" StrokeThickness="1.2"
+                                      Canvas.Left="46" Canvas.Top="60">
+                                    <Path.RenderTransform>
+                                        <TranslateTransform x:Name="MiniBubbleRightHandTranslate" X="0" Y="0" />
+                                    </Path.RenderTransform>
+                                </Path>
+
+                                <!-- Mini Bubble Expressive Mouth -->
+                                <Canvas Canvas.Left="0" Canvas.Top="58" IsHitTestVisible="False">
+                                    <Canvas.RenderTransform>
+                                        <ScaleTransform x:Name="MiniBubbleMouthScale" ScaleX="0" ScaleY="0" CenterX="0" CenterY="0" />
+                                    </Canvas.RenderTransform>
+                                    <Path Data="M -14,0 C -14,18 14,18 14,0 C 14,-2 -14,-2 -14,0 Z"
+                                          Fill="#28111A" Stroke="#20000000" StrokeThickness="1" />
+                                    <Path Data="M -8,7 C -8,16 8,16 8,7 C 8,5 -8,5 -8,7 Z"
+                                          Fill="#FF6584" />
+                                </Canvas>
+
+                                <!-- Mini Bubble Pet Heart Particle -->
+                                <Path x:Name="MiniBubblePetHeart"
+                                      Data="M 12,21.35 L 10.55,20.03 C 5.4,15.36 2,12.28 2,8.5 C 2,5.42 4.42,3 7.5,3 C 9.24,3 10.91,3.81 12,5.09 C 13.09,3.81 14.76,3 16.5,3 C 19.58,3 22,5.42 22,8.5 C 22,12.28 18.6,15.36 13.45,20.04 L 12,21.35 Z"
+                                      Fill="#FF2E93"
+                                      Width="24" Height="24" Stretch="Uniform"
+                                      Canvas.Left="35" Canvas.Top="-65"
+                                      Opacity="0" IsHitTestVisible="False">
+                                    <Path.RenderTransform>
+                                        <TranslateTransform x:Name="MiniBubblePetHeartTranslate" X="0" Y="0" />
+                                    </Path.RenderTransform>
+                                </Path>
+
+                                <!-- Mini Bubble Sleep / Thought Badge -->
+                                <Border x:Name="MiniBubbleThoughtBadge"
+                                        Canvas.Left="-30" Canvas.Top="-112"
+                                        Width="60" Height="24" CornerRadius="12"
+                                        Background="#E00B0E17"
+                                        BorderBrush="{DynamicResource DynamicAccentSoftBrush}"
+                                        BorderThickness="1.5"
+                                        Visibility="Collapsed" Opacity="0"
+                                        IsHitTestVisible="False">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Ellipse Width="4.5" Height="4.5" Fill="{DynamicResource DynamicAccentBrush}" Margin="2,0" />
+                                        <Ellipse Width="4.5" Height="4.5" Fill="{DynamicResource DynamicAccentBrush}" Margin="2,0" />
+                                        <Ellipse Width="4.5" Height="4.5" Fill="{DynamicResource DynamicAccentBrush}" Margin="2,0" />
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Mini Bubble Atmospheric Night Mood -->
+                                <Grid x:Name="MiniBubbleNightSleepIndicator"
+                                      Canvas.Left="35" Canvas.Top="-115"
+                                      Width="26" Height="26"
+                                      Visibility="Collapsed" Opacity="0"
+                                      IsHitTestVisible="False">
+                                    <TextBlock Text="🌙" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Grid>
+
+                                <!-- DJ Headphone Accessory (Appears when music is playing) -->
+                                <Canvas x:Name="MiniBubbleHeadphones" Opacity="0" IsHitTestVisible="False">
+                                    <!-- Top Headband Outer Arch -->
+                                    <Path Data="M -94,6 C -94,-96 94,-96 94,6"
+                                          Stroke="#181C26" StrokeThickness="11" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                                    <!-- Top Headband Inner Cushion -->
+                                    <Path Data="M -78,-26 C -78,-90 78,-90 78,-26"
+                                          Stroke="#0C0E14" StrokeThickness="5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                                    <!-- Top Headband Accent Center Stripe -->
+                                    <Path Data="M -74,-42 C -74,-99 74,-99 74,-42"
+                                          Stroke="{DynamicResource DynamicAccentBrush}" StrokeThickness="2.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+
+                                    <!-- Left Ear Cup Hinge & Swivel -->
+                                    <Rectangle Canvas.Left="-100" Canvas.Top="4" Width="8" Height="10" RadiusX="3" RadiusY="3" Fill="#64748B" />
+                                    <!-- Left Ear Cup Cushion & Shell -->
+                                    <Border Canvas.Left="-118" Canvas.Top="12" Width="26" Height="48" CornerRadius="13"
+                                            Background="#181C26" BorderBrush="{DynamicResource DynamicAccentBrush}" BorderThickness="2.2">
+                                        <Border.RenderTransform>
+                                            <RotateTransform Angle="12" CenterX="13" CenterY="24" />
+                                        </Border.RenderTransform>
+                                        <Grid>
+                                            <Border Width="16" Height="36" CornerRadius="8" Background="#0C0E14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <Ellipse Width="6" Height="6" Fill="{DynamicResource DynamicAccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Right Ear Cup Hinge & Swivel -->
+                                    <Rectangle Canvas.Left="92" Canvas.Top="4" Width="8" Height="10" RadiusX="3" RadiusY="3" Fill="#64748B" />
+                                    <!-- Right Ear Cup Cushion & Shell -->
+                                    <Border Canvas.Left="92" Canvas.Top="12" Width="26" Height="48" CornerRadius="13"
+                                            Background="#181C26" BorderBrush="{DynamicResource DynamicAccentBrush}" BorderThickness="2.2">
+                                        <Border.RenderTransform>
+                                            <RotateTransform Angle="-12" CenterX="13" CenterY="24" />
+                                        </Border.RenderTransform>
+                                        <Grid>
+                                            <Border Width="16" Height="36" CornerRadius="8" Background="#0C0E14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <Ellipse Width="6" Height="6" Fill="{DynamicResource DynamicAccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Grid>
+                                    </Border>
+                                </Canvas>
+                            </Canvas>
+                        </Viewbox>
+                    </Grid>
+
+                    <!-- Mini Mood / Particle Reaction Badge (Popping emoji / expression mark) -->
+                    <Border x:Name="AvatarMiniMoodBadge"
+                            HorizontalAlignment="Right" VerticalAlignment="Top"
+                            Margin="0,0,0,0"
+                            Background="#E6101625"
+                            BorderBrush="{DynamicResource DynamicAccentBorderBrush}"
+                            BorderThickness="1.2"
+                            CornerRadius="9"
+                            Padding="3.5,1.5"
+                            Opacity="0"
+                            IsHitTestVisible="False"
+                            RenderTransformOrigin="0.5,0.5">
+                        <Border.RenderTransform>
+                            <ScaleTransform x:Name="AvatarMiniMoodBadgeScale" ScaleX="0.5" ScaleY="0.5" />
+                        </Border.RenderTransform>
+                        <TextBlock x:Name="AvatarMiniMoodBadgeText" Text="✨" FontSize="9" Foreground="#FDE047" FontWeight="Bold" />
+                    </Border>
+
+                    <!-- Mini Status Pip (Corner status indicator) -->
+                    <Ellipse x:Name="AvatarMiniStatusDot"
+                             Width="8" Height="8"
+                             HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                             Margin="0,0,3,3"
+                             Fill="#00E5A3"
+                             Stroke="#FA060811" StrokeThickness="1.5"
+                             Visibility="Collapsed" />
+
+                    <!-- Extension Slot for mini quick controls -->
+                    <StackPanel x:Name="AvatarMiniExtensionPanel"
+                                HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                                Visibility="Collapsed" />
+                </Grid>
+
+                <!-- ============================================================== -->
+                <!-- 2. EXPANDED VIEW (Fixed size + 144Hz GPU Anim)                 -->
+                <!-- ============================================================== -->
+                <Grid x:Name="ExpandedView" Width="656" Height="184" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" Opacity="0" Margin="0,0,0,0" RenderTransformOrigin="0.5,0.5">
+                    <Grid.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform x:Name="ExpandedScale" ScaleX="0.94" ScaleY="0.94" />
+                            <TranslateTransform x:Name="ExpandedTranslate" Y="-6" />
+                        </TransformGroup>
+                    </Grid.RenderTransform>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Top Navigation Bar & Action Icons (Matches reference image capsule & circular dark-glass buttons) -->
+                    <Grid Grid.Row="0" Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Left: Obsidian-Glass Pill Navigation Tabs with Vector Icons -->
+                        <Border Grid.Column="0" HorizontalAlignment="Left" Background="#D8080A14" CornerRadius="17" Padding="3,2.5" BorderBrush="#26FFFFFF" BorderThickness="1">
+                            <StackPanel Orientation="Horizontal">
+                                <Button x:Name="TabBtnMedia" Style="{StaticResource NavTabButton}" Click="TabButton_Click" Tag="0">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Path x:Name="TabIconMedia" Data="M 9,18 C 9,19.7 7.7,21 6,21 C 4.3,21 3,19.7 3,18 C 3,16.3 4.3,15 6,15 C 7.7,15 9,16.3 9,18 Z M 21,16 C 21,17.7 19.7,19 18,19 C 16.3,19 15,17.7 15,16 C 15,14.3 16.3,13 18,13 C 19.7,13 21,14.3 21,16 Z M 9,18 L 9,5 L 21,3 L 21,16"
+                                              Stroke="#E2E8F0" StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                              Width="11" Height="11" Stretch="Uniform" Margin="0,0,5,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="Medya" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                                <Button x:Name="TabBtnTray" Style="{StaticResource NavTabButton}" Click="TabButton_Click" Tag="1">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Path x:Name="TabIconTray" Data="M 3,7 C 3,5.9 3.9,5 5,5 L 9.5,5 L 11.5,7 L 19,7 C 20.1,7 21,7.9 21,9 L 21,18 C 21,19.1 20.1,20 19,20 L 5,20 C 3.9,20 3,19.1 3,18 Z"
+                                              Stroke="#94A3B8" StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                              Width="11" Height="11" Stretch="Uniform" Margin="0,0,5,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="Tepsi" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                                <Button x:Name="TabBtnStats" Style="{StaticResource NavTabButton}" Click="TabButton_Click" Tag="2">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Path x:Name="TabIconStats" Data="M 13,2 L 4,14 L 11,14 L 10,22 L 20,10 L 13,10 Z"
+                                              Fill="#94A3B8" Width="10.5" Height="11" Stretch="Uniform" Margin="0,0,5,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="Sistem" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                                <Button x:Name="TabBtnTimer" Style="{StaticResource NavTabButton}" Click="TabButton_Click" Tag="3">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Path x:Name="TabIconTimer" Data="M 12,21 C 16.4,21 20,17.4 20,13 C 20,8.6 16.4,5 12,5 C 7.6,5 4,8.6 4,13 C 4,17.4 7.6,21 12,21 Z M 12,9 L 12,13 L 14.5,14.5 M 9.5,2 L 14.5,2"
+                                              Stroke="#94A3B8" StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                              Width="11" Height="11" Stretch="Uniform" Margin="0,0,5,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="Sayaç" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                                <Button x:Name="TabBtnDock" Style="{StaticResource NavTabButton}" Click="TabButton_Click" Tag="4">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Path x:Name="TabIconDock" Data="M 4.5,16.5 C 3,18 3,21 3,21 C 3,21 6,21 7.5,19.5 C 8.3,18.7 8.3,17.3 7.5,16.5 C 6.7,15.7 5.3,15.7 4.5,16.5 Z M 14.5,4 C 18,3 21,3 21,3 C 21,3 21,6 20,9.5 L 13,16.5 L 7.5,11 Z"
+                                              Stroke="#94A3B8" StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                              Width="11" Height="11" Stretch="Uniform" Margin="0,0,5,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="Dock" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Right: Dark-Glass Circular & Pill Action Buttons with Crisp Vector Icons -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button x:Name="MicMuteBtn" Visibility="Collapsed" Click="MicMuteBtn_Click">
+                                <StackPanel>
+                                    <Ellipse x:Name="ExpandedMicDot" />
+                                    <TextBlock x:Name="MicMuteBtnText" />
+                                </StackPanel>
+                            </Button>
+                            <!-- Dişli Ayarlar Butonu (Settings Panel) -->
+                            <Button x:Name="SettingsBtn" Style="{StaticResource IslandIconButton}" ToolTip="Ayarlar Paneli (Settings)" Click="SettingsButton_Click" Margin="0,0,4,0" Padding="8,4.5">
+                                <Path Data="M 12,15 C 10.3,15 9,13.7 9,12 C 9,10.3 10.3,9 12,9 C 13.7,9 15,10.3 15,12 C 15,13.7 13.7,15 12,15 Z M 19.4,13 C 19.5,12.7 19.5,12.3 19.5,12 C 19.5,11.7 19.5,11.3 19.4,11 L 21.5,9.3 C 21.7,9.1 21.8,8.9 21.6,8.6 L 19.6,5.1 C 19.5,4.9 19.2,4.8 19,4.9 L 16.5,5.9 C 16,5.5 15.4,5.2 14.8,4.9 L 14.4,2.3 C 14.4,2 14.2,1.8 13.9,1.8 L 10.1,1.8 C 9.8,1.8 9.6,2 9.6,2.3 L 9.2,4.9 C 8.6,5.2 8,5.5 7.5,5.9 L 5,4.9 C 4.8,4.8 4.5,4.9 4.4,5.1 L 2.4,8.6 C 2.2,8.9 2.3,9.1 2.5,9.3 L 4.6,11 C 4.5,11.3 4.5,11.7 4.5,12 C 4.5,12.3 4.5,12.7 4.6,13 L 2.5,14.7 C 2.3,14.9 2.2,15.1 2.4,15.4 L 4.4,18.9 C 4.5,19.1 4.8,19.2 5,19.1 L 7.5,18.1 C 8,18.5 8.6,18.8 9.2,19.1 L 9.6,21.7 C 9.6,22 9.8,22.2 10.1,22.2 L 13.9,22.2 C 14.2,22.2 14.4,22 14.4,21.7 L 14.8,19.1 C 15.4,18.8 16,18.5 16.5,18.1 L 19,19.1 C 19.2,19.2 19.5,19.1 19.6,18.9 L 21.6,15.4 C 21.8,15.1 21.7,14.9 21.5,14.7 L 19.4,13 Z"
+                                      Stroke="#E2E8F0" StrokeThickness="1.5" Width="12.5" Height="13" Stretch="Uniform" VerticalAlignment="Center" />
+                            </Button>
+                            <Button x:Name="SpotlightToggleBtn" Style="{StaticResource IslandIconButton}" ToolTip="Hızlı Arama &amp; Hesap Makinesi (Alt+Boşluk / Ctrl+Boşluk)" Click="SpotlightToggle_Click" Margin="0,0,4,0" Padding="8,4.5">
+                                <Path Data="M 9.5,16 C 13.09,16 16,13.09 16,9.5 C 16,5.91 13.09,3 9.5,3 C 5.91,3 3,5.91 3,9.5 C 3,13.09 5.91,16 9.5,16 Z M 14.5,14.5 L 19,19"
+                                      Stroke="#E2E8F0" StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                      Width="11" Height="11" Stretch="Uniform" VerticalAlignment="Center" />
+                            </Button>
+                            <Button x:Name="LyricsToggleBtn" Style="{StaticResource IslandIconButton}" ToolTip="Canlı Şarkı Sözleri (Karaoke Modu)" Click="LyricsToggle_Click" Margin="0,0,4,0" Padding="8,4.5">
+                                <Path Data="M 12,2 C 10.34,2 9,3.34 9,5 L 9,11 C 9,12.66 10.34,14 12,14 C 13.66,14 15,12.66 15,11 L 15,5 C 15,3.34 13.66,2 12,2 Z M 19,10 L 19,11 C 19,14.53 16.39,17.44 13,17.93 L 13,21 L 11,21 L 11,17.93 C 7.61,17.44 5,14.53 5,11 L 5,10"
+                                      Stroke="#E2E8F0" StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                      Width="11" Height="11" Stretch="Uniform" VerticalAlignment="Center" />
+                            </Button>
+                            <Button Style="{StaticResource IslandIconButton}" ToolTip="Tam Ekran Görüntüsü Al (Tepsiye &amp; Panoya Kaydeder)" Click="FullScreenshot_Click" Margin="0,0,4,0" Padding="8,5">
+                                <Path Data="M 4,8 C 4,6.9 4.9,6 6,6 L 8,6 L 9.5,4 L 14.5,4 L 16,6 L 18,6 C 19.1,6 20,6.9 20,8 L 20,17 C 20,18.1 19.1,19 18,19 L 6,19 C 4.9,19 4,18.1 4,17 Z M 12,15.5 C 13.9,15.5 15.5,13.9 15.5,12 C 15.5,10.1 13.9,8.5 12,8.5 C 10.1,8.5 8.5,10.1 8.5,12 C 8.5,13.9 10.1,15.5 12,15.5 Z"
+                                      Stroke="#E2E8F0" StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                      Width="12" Height="11" Stretch="Uniform" />
+                            </Button>
+                            <Button Style="{StaticResource IslandIconButton}" ToolTip="Bölge Kırpma Aracı (Seçilen Alanı Tepsiye Ekler)" Click="RegionSnip_Click" Margin="0,0,4,0" Padding="8,5">
+                                <Path Data="M 6,9 C 7.7,9 9,7.7 9,6 C 9,4.3 7.7,3 6,3 C 4.3,3 3,4.3 3,6 C 3,7.7 4.3,9 6,9 Z M 6,21 C 7.7,21 9,19.7 9,18 C 9,16.3 7.7,15 6,15 C 4.3,15 3,16.3 3,18 C 3,19.7 4.3,21 6,21 Z M 20,4 L 8.1,15.9 M 14.5,14.5 L 20,20 M 8.1,8.1 L 12,12"
+                                      Stroke="#E2E8F0" StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                      Width="12" Height="11" Stretch="Uniform" />
+                            </Button>
+                            <Button x:Name="StealthModeBtn" Style="{StaticResource IslandIconButton}" ToolTip="İnce Çizgi Modu (Sekmeleri kapatmamak için kapalıyken 6px ince çizgiye dönüşür)" Click="StealthModeBtn_Click" Margin="0,0,4,0" Padding="8,5">
+                                <Grid VerticalAlignment="Center">
+                                    <TextBlock x:Name="StealthModeIconText" Visibility="Collapsed" />
+                                    <Rectangle Width="10" Height="2" RadiusX="1" RadiusY="1" Fill="#E2E8F0" VerticalAlignment="Center" />
+                                </Grid>
+                            </Button>
+                            <Button x:Name="PinButton" Style="{StaticResource IslandIconButton}" ToolTip="Adayı Açık Tut / Sabitle" Click="PinButton_Click" Margin="0,0,4,0" Padding="8,5">
+                                <Grid VerticalAlignment="Center">
+                                    <Path Data="M 16,3 L 21,8 L 19,10 L 16.5,7.5 L 12,12 L 13,16 L 11.5,17.5 L 7.5,13.5 L 3,18 L 2,17 L 6.5,12.5 L 2.5,8.5 L 4,7 L 8,8 L 12.5,3.5 L 10,1 Z"
+                                          Fill="#E2E8F0" Width="10" Height="10" Stretch="Uniform" VerticalAlignment="Center" />
+                                    <TextBlock x:Name="PinIconText" Visibility="Collapsed" />
+                                </Grid>
+                            </Button>
+                            <Button Style="{StaticResource IslandIconButton}" ToolTip="Küçült (Sağ Tık: Avatar Mini Mod)" Click="CollapseButton_Click" Padding="8,5">
+                                <Path Data="M 12,7 L 18,15 L 6,15 Z" Fill="#FFFFFF" Width="9" Height="8" Stretch="Uniform" />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Body Content Area (Tabs) -->
+                    <Grid Grid.Row="1">
+                        <!-- ================================================================ -->
+                        <!-- TAB 0: ADAPTIVE GLASSMORPHIC MEDIA PLAYER                        -->
+                        <!-- ================================================================ -->
+                        <Grid x:Name="TabMediaView" Visibility="Visible">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Left: Clean Rounded Album Art with Adaptive Glowing Rim (True Rounded ImageBrush = Zero Corner Bleed) -->
+                            <Border x:Name="LargeAlbumBorder" Grid.Column="0" Width="124" Height="126" CornerRadius="18" VerticalAlignment="Center" Background="#121420" Margin="0,0,10,0" BorderBrush="{DynamicResource DynamicAccentBorderBrush}" BorderThickness="1.2">
+                                <Grid>
+                                    <Image x:Name="LargeThumbImage" Visibility="Collapsed" />
+                                    <Border x:Name="LargeThumbVisualBorder" CornerRadius="17" RenderOptions.BitmapScalingMode="HighQuality">
+                                        <Border.Background>
+                                            <ImageBrush x:Name="LargeThumbBrush" Stretch="UniformToFill" />
+                                        </Border.Background>
+                                    </Border>
+                                    <TextBlock x:Name="NoCoverFallback" Text="🎵" FontSize="32" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.45" />
+                                </Grid>
+                            </Border>
+
+                            <!-- Center: Adaptive Glassmorphic Media Card (Matches the card aesthetic of Sistem tab) -->
+                            <Border x:Name="MediaControlsCardBorder" Grid.Column="1" Height="126" VerticalAlignment="Center" CornerRadius="18" BorderThickness="1" BorderBrush="#28FFFFFF" Padding="13,7,13,11" ClipToBounds="True">
+                                <Border.Background>
+                                    <RadialGradientBrush Center="0.88,0.88" GradientOrigin="0.88,0.88" RadiusX="0.82" RadiusY="0.85">
+                                        <GradientStop x:Name="MediaCardGlowStop" Color="#34F43F5E" Offset="0.0" />
+                                        <GradientStop Color="#E60B0E18" Offset="0.72" />
+                                        <GradientStop Color="#F2080A12" Offset="1.0" />
+                                    </RadialGradientBrush>
+                                </Border.Background>
+                                <StackPanel VerticalAlignment="Center">
+                                <!-- Row 1: Track Title & Artist (Clean Minimal Typography like "Hayranım / Berk Baysal") + Audio Output Pill -->
+                                <Grid Margin="0,0,0,2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                        <!-- Hidden badge kept for compatibility, clean title shown directly -->
+                                        <Border x:Name="MediaAppBadge" Visibility="Collapsed">
+                                            <TextBlock x:Name="MediaAppText" />
+                                        </Border>
+                                        <TextBlock x:Name="ExpandedTrackTitle"
+                                                   Text="Çalan şarkı bekleniyor..."
+                                                   Foreground="#FFFFFF"
+                                                   FontSize="14"
+                                                   FontWeight="Bold"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   MaxWidth="250" />
+                                        <TextBlock x:Name="ExpandedArtist"
+                                                   Text="Sanatçı bilgisi yok"
+                                                   Foreground="#A1A1AA"
+                                                   FontSize="11"
+                                                   Margin="0,0.5,0,0"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   MaxWidth="250" />
+
+                                        <!-- Mini Live Karaoke / Lyrics Line -->
+                                        <Border x:Name="LiveLyricsPill"
+                                                Background="#18FFFFFF"
+                                                BorderBrush="{DynamicResource DynamicAccentBorderBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="8"
+                                                Padding="6,1"
+                                                Margin="0,1.5,0,0"
+                                                HorizontalAlignment="Left"
+                                                Cursor="Hand"
+                                                MouseLeftButtonUp="LyricsPill_Click"
+                                                ToolTip="Tam Şarkı Sözleri ve Karaoke Görünümünü Aç (Tıklayın)">
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Path Data="M 6,1 C 4.9,1 4,1.9 4,3 L 4,6 C 4,7.1 4.9,8 6,8 C 7.1,8 8,7.1 8,6 L 8,3 C 8,1.9 7.1,1 6,1 Z M 10,5.5 C 10,7.7 8.2,9.5 6,9.5 C 3.8,9.5 2,7.7 2,5.5 M 6,9.5 L 6,11.5" Stroke="#F43F5E" StrokeThickness="1.3" Width="8" Height="9" Stretch="Uniform" Margin="0,0,5,0" VerticalAlignment="Center" />
+                                                <TextBlock x:Name="LiveCurrentLyricText"
+                                                           Text="Şarkı sözü bekleniyor..."
+                                                           Foreground="#F8FAFC"
+                                                           FontWeight="SemiBold"
+                                                           FontSize="10"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           MaxWidth="230"
+                                                           VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <Button Grid.Column="1" Style="{StaticResource IslandIconButton}" Padding="7,3" VerticalAlignment="Top" Click="SwitchAudioDevice_Click" ToolTip="Ses Çıkış Cihazını Değiştirmek İçin Tıklayın (Hoparlör / Kulaklık)">
+                                        <TextBlock x:Name="AudioDeviceText" Text="🎧 Cihaz" FontSize="10" Foreground="#D4D4D8" MaxWidth="110" TextTrimming="CharacterEllipsis" />
+                                    </Button>
+                                </Grid>
+
+                                <!-- Row 2: Sleek Crimson Seek Bar (İleri / Geri Sarma Çubuğu) -->
+                                <Grid Margin="0,0,0,3" VerticalAlignment="Center">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="34" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="34" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock x:Name="CurrentTimeText" Grid.Column="0" Text="00:00" Foreground="#A1A1AA" FontSize="10" FontWeight="Medium" VerticalAlignment="Center" />
+
+                                    <Slider x:Name="TrackSeekSlider"
+                                            Grid.Column="1"
+                                            Minimum="0"
+                                            Maximum="100"
+                                            Value="0"
+                                            IsMoveToPointEnabled="True"
+                                            VerticalAlignment="Center"
+                                            Margin="4,0"
+                                            ToolTip="Şarkıyı ileri veya geri sarmak için tıklayın ya da sürükleyin"
+                                            PreviewMouseLeftButtonDown="TrackSeekSlider_PreviewMouseLeftButtonDown"
+                                            PreviewMouseLeftButtonUp="TrackSeekSlider_PreviewMouseLeftButtonUp"
+                                            ValueChanged="TrackSeekSlider_ValueChanged" />
+
+                                    <TextBlock x:Name="TotalTimeText" Grid.Column="2" Text="00:00" Foreground="#71717A" FontSize="10" FontWeight="Medium" VerticalAlignment="Center" TextAlignment="Right" />
+                                </Grid>
+
+                                <!-- Row 3: Design #1 Modern Minimal Vector Buttons + Divider + Crimson Volume Bar -->
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <!-- 1. Shuffle Vector Button -->
+                                    <Button x:Name="ShuffleBtn" Style="{StaticResource MinimalGhostButton}" Click="ShuffleToggle_Click" ToolTip="Karışık Çal" Margin="0,0,3,0">
+                                        <Path x:Name="ShuffleIconPath"
+                                              Data="M 16,4 L 21,4 L 21,9 M 4,19 L 8,19 C 11.5,19 13.5,6.5 17,4 L 21,4 M 16,20 L 21,20 L 21,15 M 4,5 L 8,5 C 10.5,5 12,9 13.5,11.5 M 16.5,16.5 L 21,20"
+                                              Stroke="#CBD5E1" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                              Width="14" Height="14" Stretch="Uniform" />
+                                    </Button>
+
+                                    <!-- 2. Previous Track (Crisp Solid Vector Skip-Back |◀) -->
+                                    <Button Style="{StaticResource MinimalGhostButton}" Click="PrevTrack_Click" ToolTip="Önceki Parça" Margin="1,0">
+                                        <Path Data="M 5,4 L 7.5,4 L 7.5,20 L 5,20 Z M 9,12 L 19,4.5 L 19,19.5 Z"
+                                              Fill="#FFFFFF" Width="14" Height="14" Stretch="Uniform" />
+                                    </Button>
+
+                                    <!-- 3. Centerpiece Circular Crimson Play / Pause Button (Exact media_1791143226211.png) -->
+                                    <Button x:Name="PlayPauseButton" Style="{StaticResource ModernMinimalPlayButton}" Margin="5,0" Click="PlayPause_Click" ToolTip="Oynat / Duraklat" VerticalAlignment="Center">
+                                        <Grid>
+                                            <TextBlock x:Name="PlayPauseIcon" Visibility="Collapsed" />
+                                            <Path x:Name="PlayPauseIconPath"
+                                                  Data="M 7,5 L 10.2,5 L 10.2,19 L 7,19 Z M 13.8,5 L 17,5 L 17,19 L 13.8,19 Z"
+                                                  Fill="#FFFFFF" Width="13" Height="14" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Grid>
+                                    </Button>
+
+                                    <!-- 4. Next Track (Crisp Solid Vector Skip-Forward ▶|) -->
+                                    <Button Style="{StaticResource MinimalGhostButton}" Click="NextTrack_Click" ToolTip="Sonraki Parça" Margin="1,0">
+                                        <Path Data="M 5,4.5 L 15,12 L 5,19.5 Z M 16.5,4 L 19,4 L 19,20 L 16.5,20 Z"
+                                              Fill="#FFFFFF" Width="14" Height="14" Stretch="Uniform" />
+                                    </Button>
+
+                                    <!-- 5. Repeat Vector Button (Loop Arrows 🔁) -->
+                                    <Button x:Name="RepeatBtn" Style="{StaticResource MinimalGhostButton}" Click="RepeatToggle_Click" ToolTip="Tekrarla" Margin="3,0,3,0">
+                                        <Path x:Name="RepeatIconPath"
+                                              Data="M 17,2 L 21,6 L 17,10 M 3,11 L 3,9 C 3,6.8 4.8,5 7,5 L 21,5 M 7,22 L 3,18 L 7,14 M 21,13 L 21,15 C 21,17.2 19.2,19 17,19 L 3,19"
+                                              Stroke="#CBD5E1" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                              Width="14" Height="14" Stretch="Uniform" />
+                                    </Button>
+
+                                    <!-- 6. Heart / Favorite Minimal Outline Vector Icon (Exact ♡) -->
+                                    <Button Style="{StaticResource MinimalGhostButton}" Click="FavoriteTrack_Click" ToolTip="Favori İşaretle" Margin="1,0,0,0">
+                                        <Path x:Name="HeartIconPath"
+                                              Data="M 12,21.35 L 10.55,20.03 C 5.4,15.36 2,12.28 2,8.5 C 2,5.42 4.42,3 7.5,3 C 9.24,3 10.91,3.81 12,5.09 C 13.09,3.81 14.76,3 16.5,3 C 19.58,3 22,5.42 22,8.5 C 22,12.28 18.6,15.36 13.45,20.04 L 12,21.35 Z"
+                                              Stroke="#D4D4D8" StrokeThickness="1.8" Fill="Transparent"
+                                              Width="15" Height="14" Stretch="Uniform" />
+                                    </Button>
+
+                                    <!-- 7. Subtle Vertical Divider Line (Exact Design #1 Separator |) -->
+                                    <Border Width="1" Height="18" Background="#26FFFFFF" Margin="9,0" VerticalAlignment="Center" />
+
+                                    <!-- 8. Minimal Speaker Vector Icon + Crimson Volume Slider -->
+                                    <Button Style="{StaticResource MinimalGhostButton}" Click="MuteToggle_Click" ToolTip="Sessize Al / Aç" Margin="0,0,3,0">
+                                        <Grid>
+                                            <TextBlock x:Name="MuteIconText" Visibility="Collapsed" />
+                                            <Path x:Name="SpeakerIconPath"
+                                                  Data="M 11,5 L 6,9 L 2,9 L 2,15 L 6,15 L 11,19 L 11,5 Z M 15.54,8.46 C 17.4,10.3 17.4,13.7 15.54,15.54 M 18.36,5.64 C 21.8,9.1 21.8,14.9 18.36,18.36"
+                                                  Stroke="#CBD5E1" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                                  Width="15" Height="15" Stretch="Uniform" />
+                                        </Grid>
+                                    </Button>
+
+                                    <Slider x:Name="MasterVolumeSlider" Style="{StaticResource CrimsonMediaSliderStyle}"
+                                            Width="68"
+                                            Minimum="0" Maximum="100"
+                                            Margin="2,0,0,0"
+                                            VerticalAlignment="Center"
+                                            ValueChanged="MasterVolumeSlider_ValueChanged" />
+
+                                    <TextBlock x:Name="MasterVolumePercentText" Visibility="Collapsed" />
+                                </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Right: Expanded Onee Companion Stage (Large Living Desktop Pet + Audio Bobbing + Petting) -->
+                            <Border x:Name="ExpandedAvatarStageBorder" Grid.Column="2"
+                                    Width="124" Height="126"
+                                    CornerRadius="18"
+                                    VerticalAlignment="Center"
+                                    Margin="10,0,0,0"
+                                    Background="#0EFFFFFF"
+                                    BorderBrush="{DynamicResource DynamicAccentSoftBrush}"
+                                    BorderThickness="1.2"
+                                    Cursor="Hand"
+                                    ClipToBounds="False"
+                                    ToolTip="Onee (Okşa / Dürt / Sev)"
+                                    MouseLeftButtonUp="ExpandedAvatar_MouseLeftButtonUp">
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="10" ShadowDepth="0" Color="#18000000" Opacity="0.4" />
+                                </Border.Effect>
+                                <Grid ClipToBounds="False">
+                                    <!-- Spotlight Backdrop Halo -->
+                                    <Ellipse Width="106" Height="106" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False">
+                                        <Ellipse.Fill>
+                                            <RadialGradientBrush Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
+                                                <GradientStop Color="#25F43F5E" Offset="0.0" />
+                                                <GradientStop Color="#00000000" Offset="1.0" />
+                                            </RadialGradientBrush>
+                                        </Ellipse.Fill>
+                                    </Ellipse>
+
+                                    <!-- Avatar Host with Bobbing/Dancing -->
+                                    <Viewbox Width="98" Height="98" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                                        <Viewbox.RenderTransform>
+                                            <TransformGroup>
+                                                <TranslateTransform x:Name="ExpandedAvatarBobTranslate" X="0" Y="0" />
+                                                <RotateTransform x:Name="ExpandedAvatarBobRotate" Angle="0" />
+                                            </TransformGroup>
+                                        </Viewbox.RenderTransform>
+                                        <Canvas Width="300" Height="300">
+                                            <Canvas.RenderTransform>
+                                                <TranslateTransform X="150" Y="150" />
+                                            </Canvas.RenderTransform>
+
+                                            <!-- Head Base Path -->
+                                            <Path x:Name="ExpandedStageHeadPath" Fill="{DynamicResource DynamicAvatarBodyBrush}" />
+
+                                            <!-- Left Eye Path with Eye Tracking -->
+                                            <Path x:Name="ExpandedStageLeftEyePath" Fill="#111316">
+                                                <Path.RenderTransform>
+                                                    <TranslateTransform x:Name="ExpandedLeftEyeTrack" X="0" Y="0" />
+                                                </Path.RenderTransform>
+                                            </Path>
+
+                                            <!-- Right Eye Path with Eye Tracking -->
+                                            <Path x:Name="ExpandedStageRightEyePath" Fill="#111316">
+                                                <Path.RenderTransform>
+                                                    <TranslateTransform x:Name="ExpandedRightEyeTrack" X="0" Y="0" />
+                                                </Path.RenderTransform>
+                                            </Path>
+
+                                            <!-- Soft Marshmallow Left Paw -->
+                                            <Path x:Name="ExpandedStageLeftHand"
+                                                  Data="M -15,0 C -15,-10 15,-10 15,0 C 15,10 -15,10 -15,0 Z"
+                                                  Fill="{DynamicResource DynamicAvatarBodyBrush}"
+                                                  Stroke="#25000000" StrokeThickness="1.2"
+                                                  Canvas.Left="-46" Canvas.Top="60">
+                                                <Path.RenderTransform>
+                                                    <TranslateTransform x:Name="ExpandedStageLeftHandTranslate" X="0" Y="0" />
+                                                </Path.RenderTransform>
+                                            </Path>
+
+                                            <!-- Soft Marshmallow Right Paw -->
+                                            <Path x:Name="ExpandedStageRightHand"
+                                                  Data="M -15,0 C -15,-10 15,-10 15,0 C 15,10 -15,10 -15,0 Z"
+                                                  Fill="{DynamicResource DynamicAvatarBodyBrush}"
+                                                  Stroke="#25000000" StrokeThickness="1.2"
+                                                  Canvas.Left="46" Canvas.Top="60">
+                                                <Path.RenderTransform>
+                                                    <TranslateTransform x:Name="ExpandedStageRightHandTranslate" X="0" Y="0" />
+                                                </Path.RenderTransform>
+                                            </Path>
+
+                                            <!-- Expressive Openable Mouth (Coucou File Swallow & Reactions) -->
+                                            <Canvas Canvas.Left="0" Canvas.Top="58" IsHitTestVisible="False">
+                                                <Canvas.RenderTransform>
+                                                    <ScaleTransform x:Name="ExpandedStageMouthScale" ScaleX="0" ScaleY="0" CenterX="0" CenterY="0" />
+                                                </Canvas.RenderTransform>
+                                                <Path Data="M -14,0 C -14,18 14,18 14,0 C 14,-2 -14,-2 -14,0 Z"
+                                                      Fill="#28111A" Stroke="#20000000" StrokeThickness="1" />
+                                                <Path Data="M -8,7 C -8,16 8,16 8,7 C 8,5 -8,5 -8,7 Z"
+                                                      Fill="#FF6584" />
+                                            </Canvas>
+
+                                            <!-- Petting Floating Heart Particle -->
+                                            <Path x:Name="ExpandedStageHeartParticle"
+                                                  Data="M 12,21.35 L 10.55,20.03 C 5.4,15.36 2,12.28 2,8.5 C 2,5.42 4.42,3 7.5,3 C 9.24,3 10.91,3.81 12,5.09 C 13.09,3.81 14.76,3 16.5,3 C 19.58,3 22,5.42 22,8.5 C 22,12.28 18.6,15.36 13.45,20.04 L 12,21.35 Z"
+                                                  Fill="#FF2E93"
+                                                  Width="28" Height="28" Stretch="Uniform"
+                                                  Canvas.Left="35" Canvas.Top="-65"
+                                                  Opacity="0" IsHitTestVisible="False">
+                                                <Path.RenderTransform>
+                                                    <TranslateTransform x:Name="ExpandedStageHeartTranslate" X="0" Y="0" />
+                                                </Path.RenderTransform>
+                                            </Path>
+
+                                            <!-- DJ Headphone Accessory -->
+                                            <Canvas x:Name="ExpandedStageHeadphones" Opacity="0" IsHitTestVisible="False">
+                                                <Path Data="M -94,6 C -94,-96 94,-96 94,6"
+                                                      Stroke="#181C26" StrokeThickness="11" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                                                <Path Data="M -78,-26 C -78,-90 78,-90 78,-26"
+                                                      Stroke="#0C0E14" StrokeThickness="5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                                                <Path Data="M -74,-42 C -74,-99 74,-99 74,-42"
+                                                      Stroke="{DynamicResource DynamicAccentBrush}" StrokeThickness="2.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                                                <Rectangle Canvas.Left="-100" Canvas.Top="4" Width="8" Height="10" RadiusX="3" RadiusY="3" Fill="#64748B" />
+                                                <Border Canvas.Left="-118" Canvas.Top="12" Width="26" Height="48" CornerRadius="13"
+                                                        Background="#181C26" BorderBrush="{DynamicResource DynamicAccentBrush}" BorderThickness="2.2">
+                                                    <Border.RenderTransform>
+                                                        <RotateTransform Angle="12" CenterX="13" CenterY="24" />
+                                                    </Border.RenderTransform>
+                                                    <Grid>
+                                                        <Border Width="16" Height="36" CornerRadius="8" Background="#0C0E14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                        <Ellipse Width="6" Height="6" Fill="{DynamicResource DynamicAccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                    </Grid>
+                                                </Border>
+                                                <Rectangle Canvas.Left="92" Canvas.Top="4" Width="8" Height="10" RadiusX="3" RadiusY="3" Fill="#64748B" />
+                                                <Border Canvas.Left="92" Canvas.Top="12" Width="26" Height="48" CornerRadius="13"
+                                                        Background="#181C26" BorderBrush="{DynamicResource DynamicAccentBrush}" BorderThickness="2.2">
+                                                    <Border.RenderTransform>
+                                                        <RotateTransform Angle="-12" CenterX="13" CenterY="24" />
+                                                    </Border.RenderTransform>
+                                                    <Grid>
+                                                        <Border Width="16" Height="36" CornerRadius="8" Background="#0C0E14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                        <Ellipse Width="6" Height="6" Fill="{DynamicResource DynamicAccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                    </Grid>
+                                                </Border>
+                                            </Canvas>
+                                        </Canvas>
+                                    </Viewbox>
+                                </Grid>
+                            </Border>
+                        </Grid>
+
+                        <!-- ============================================== -->
+                        <!-- TAB 1: FILE TRAY & CLIPBOARD HISTORY          -->
+                        <!-- ============================================== -->
+                        <!-- ============================================== -->
+                        <!-- TAB 1: FILE TRAY & CLIPBOARD HISTORY          -->
+                        <!-- ============================================== -->
+                        <Grid x:Name="TabTrayView" Visibility="Collapsed">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="1*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Column 1: Dosya Tepsisi (File Tray Card) -->
+                            <Border x:Name="TrayCardBorder" Grid.Column="0" CornerRadius="20" BorderThickness="1" BorderBrush="#28FFFFFF" Padding="12,10" ClipToBounds="True"
+                                    AllowDrop="True"
+                                    Drop="FileTray_Drop"
+                                    DragOver="FileTray_DragOver">
+                                <Border.Background>
+                                    <RadialGradientBrush Center="0.85,0.85" GradientOrigin="0.85,0.85" RadiusX="0.85" RadiusY="0.85">
+                                        <GradientStop x:Name="TrayCardGlowStop" Color="#30F43F5E" Offset="0.0" />
+                                        <GradientStop Color="#E60B0E18" Offset="0.75" />
+                                        <GradientStop Color="#F2080A12" Offset="1.0" />
+                                    </RadialGradientBrush>
+                                </Border.Background>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Tray Header: SVG Icon + Title + Count Badge -->
+                                    <Grid Grid.Row="0" Margin="0,0,0,7">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Path Data="M 3,7 C 3,5.9 3.9,5 5,5 L 9.5,5 L 11.5,7 L 19,7 C 20.1,7 21,7.9 21,9 L 21,18 C 21,19.1 20.1,20 19,20 L 5,20 C 3.9,20 3,19.1 3,18 Z"
+                                                  Stroke="#FB7185" StrokeThickness="1.6" Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                            <TextBlock Text="Dosya Tepsisi" Foreground="#FFFFFF" FontWeight="Bold" FontSize="11.5" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                        <Border x:Name="TrayCountBadge" HorizontalAlignment="Right" Background="#18FFFFFF" BorderBrush="#20FFFFFF" BorderThickness="1" CornerRadius="9" Padding="6,1.5">
+                                            <TextBlock x:Name="TrayCountText" Text="0 Dosya" Foreground="#94A3B8" FontSize="9.5" FontWeight="Medium" />
+                                        </Border>
+                                    </Grid>
+
+                                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                                        <StackPanel x:Name="TrayItemsPanel">
+                                            <Border x:Name="TrayEmptyText" BorderBrush="#26FFFFFF" BorderThickness="1" CornerRadius="14" Padding="12,14" Margin="0,2" HorizontalAlignment="Stretch" Background="#0CFFFFFF">
+                                                <StackPanel HorizontalAlignment="Center">
+                                                    <TextBlock Text="📁" FontSize="18" HorizontalAlignment="Center" Margin="0,0,0,3" Opacity="0.6" />
+                                                    <TextBlock Text="Dosyaları buraya sürükleyin&#x0a;veya 📸 ile ekran görüntüsü alın" Foreground="#64748B" FontSize="10" TextAlignment="Center" LineHeight="14" />
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+                                    </ScrollViewer>
+                                </Grid>
+                            </Border>
+
+                            <!-- Column 2: Hızlı Pano (Clipboard History Card) -->
+                            <Border x:Name="ClipboardCardBorder" Grid.Column="2" CornerRadius="20" BorderThickness="1" BorderBrush="#28FFFFFF" Padding="12,10" ClipToBounds="True">
+                                <Border.Background>
+                                    <RadialGradientBrush Center="0.85,0.85" GradientOrigin="0.85,0.85" RadiusX="0.85" RadiusY="0.85">
+                                        <GradientStop x:Name="ClipboardCardGlowStop" Color="#30EC4899" Offset="0.0" />
+                                        <GradientStop Color="#E60B0E18" Offset="0.75" />
+                                        <GradientStop Color="#F2080A12" Offset="1.0" />
+                                    </RadialGradientBrush>
+                                </Border.Background>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Clipboard Header: SVG Icon + Title + Clear Button -->
+                                    <Grid Grid.Row="0" Margin="0,0,0,7">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Path Data="M 16,4 L 19,4 C 20.1,4 21,4.9 21,6 L 21,20 C 21,21.1 20.1,22 19,22 L 5,22 C 3.9,22 3,21.1 3,20 L 3,6 C 3,4.9 3.9,4 5,4 L 8,4 M 8,2 L 16,2 C 16.55,2 17,2.45 17,3 L 17,5 C 17,5.55 16.55,6 16,6 L 8,6 C 7.45,6 7,5.55 7,5 L 7,3 C 7,2.45 7.45,2 8,2 Z"
+                                                  Stroke="#F472B6" StrokeThickness="1.5" Width="12" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                            <TextBlock Text="Pano Geçmişi" Foreground="#FFFFFF" FontWeight="Bold" FontSize="11.5" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                        <Button Style="{StaticResource IslandIconButton}" Content="Temizle" HorizontalAlignment="Right" Padding="7,2" FontSize="9.5" Click="ClearClipboard_Click" ToolTip="Pano Geçmişini Sıfırla" />
+                                    </Grid>
+
+                                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                                        <StackPanel x:Name="ClipboardItemsPanel">
+                                            <Border x:Name="ClipboardEmptyText" BorderBrush="#26FFFFFF" BorderThickness="1" CornerRadius="14" Padding="12,14" Margin="0,2" HorizontalAlignment="Stretch" Background="#0CFFFFFF">
+                                                <StackPanel HorizontalAlignment="Center">
+                                                    <TextBlock Text="📋" FontSize="18" HorizontalAlignment="Center" Margin="0,0,0,3" Opacity="0.6" />
+                                                    <TextBlock Text="Kopyalanan metinler listelenir&#x0a;Tıklayarak panoya tekrar alın" Foreground="#64748B" FontSize="10" TextAlignment="Center" LineHeight="14" />
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+                                    </ScrollViewer>
+                                </Grid>
+                            </Border>
+                        </Grid>
+
+                        <!-- ================================================================ -->
+                        <!-- TAB 2: DESIGN #2 ADAPTIVE SYSTEM STATS, POWER & WEATHER CARDS    -->
+                        <!-- ================================================================ -->
+                        <Grid x:Name="TabStatsView" Visibility="Collapsed">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="6" />
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="6" />
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="6" />
+                                <ColumnDefinition Width="1.02*" />
+                                <ColumnDefinition Width="6" />
+                                <ColumnDefinition Width="1.28*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- ========================================== -->
+                            <!-- CARD 1: CPU (Icon + 5-Bar Chart + Metrics) -->
+                            <!-- ========================================== -->
+                            <Border x:Name="StatCpuCardBorder" Grid.Column="0" CornerRadius="20" BorderThickness="1" BorderBrush="#28FFFFFF" Padding="10,9" ClipToBounds="True">
+                                <Border.Background>
+                                    <RadialGradientBrush Center="0.85,0.9" GradientOrigin="0.85,0.9" RadiusX="0.85" RadiusY="0.85">
+                                        <GradientStop x:Name="CpuCardGlowStop" Color="#32F43F5E" Offset="0.0" />
+                                        <GradientStop Color="#E60B0E18" Offset="0.75" />
+                                        <GradientStop Color="#F2080A12" Offset="1.0" />
+                                    </RadialGradientBrush>
+                                </Border.Background>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Row 0: CPU Icon Badge + Title & Model -->
+                                    <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Top">
+                                        <Border x:Name="CpuIconBadge" Width="28" Height="28" CornerRadius="8" Background="#2CF43F5E" BorderBrush="#48F43F5E" BorderThickness="1" Margin="0,0,7,0">
+                                            <Path x:Name="CpuIconPath"
+                                                  Data="M 7,7 L 17,7 L 17,17 L 7,17 Z M 9.5,9.5 L 14.5,9.5 L 14.5,14.5 L 9.5,14.5 Z M 9,3 L 9,6 M 12,3 L 12,6 M 15,3 L 15,6 M 9,18 L 9,21 M 12,18 L 12,21 M 15,18 L 15,21 M 3,9 L 6,9 M 3,12 L 6,12 M 3,15 L 6,15 M 18,9 L 21,9 M 18,12 L 21,12 M 18,15 L 21,15"
+                                                  Stroke="#FB7185" StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                                  Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="CPU" Foreground="#FFFFFF" FontSize="12" FontWeight="Bold" />
+                                            <TextBlock x:Name="StatCpuModelText" Text="AMD Ryzen" Foreground="#94A3B8" FontSize="9" TextTrimming="CharacterEllipsis" MaxWidth="72" />
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <!-- Row 1: Big Percentage + 5-Bar Mini Chart -->
+                                    <Grid Grid.Row="1" VerticalAlignment="Bottom" Margin="0,4,0,5">
+                                        <TextBlock x:Name="StatCpuPercentText" Text="18%" Foreground="#FFFFFF" FontSize="22" FontWeight="Bold" VerticalAlignment="Bottom" />
+
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="24">
+                                            <Rectangle x:Name="CpuHistBar1" Width="3.6" Height="22" RadiusX="1.8" RadiusY="1.8" Fill="#66F43F5E" Margin="1.1,0" RenderTransformOrigin="0.5,1.0">
+                                                <Rectangle.RenderTransform><ScaleTransform x:Name="CpuHistScale1" ScaleY="0.28" /></Rectangle.RenderTransform>
+                                            </Rectangle>
+                                            <Rectangle x:Name="CpuHistBar2" Width="3.6" Height="22" RadiusX="1.8" RadiusY="1.8" Fill="#88F43F5E" Margin="1.1,0" RenderTransformOrigin="0.5,1.0">
+                                                <Rectangle.RenderTransform><ScaleTransform x:Name="CpuHistScale2" ScaleY="0.40" /></Rectangle.RenderTransform>
+                                            </Rectangle>
+                                            <Rectangle x:Name="CpuHistBar3" Width="3.6" Height="22" RadiusX="1.8" RadiusY="1.8" Fill="#AAF43F5E" Margin="1.1,0" RenderTransformOrigin="0.5,1.0">
+                                                <Rectangle.RenderTransform><ScaleTransform x:Name="CpuHistScale3" ScaleY="0.34" /></Rectangle.RenderTransform>
+                                            </Rectangle>
+                                            <Rectangle x:Name="CpuHistBar4" Width="3.6" Height="22" RadiusX="1.8" RadiusY="1.8" Fill="#CCF43F5E" Margin="1.1,0" RenderTransformOrigin="0.5,1.0">
+                                                <Rectangle.RenderTransform><ScaleTransform x:Name="CpuHistScale4" ScaleY="0.68" /></Rectangle.RenderTransform>
+                                            </Rectangle>
+                                            <Rectangle x:Name="CpuHistBar5" Width="3.6" Height="22" RadiusX="1.8" RadiusY="1.8" Fill="#FFF43F5E" Margin="1.1,0,0,0" RenderTransformOrigin="0.5,1.0">
+                                                <Rectangle.RenderTransform><ScaleTransform x:Name="CpuHistScale5" ScaleY="0.88" /></Rectangle.RenderTransform>
+                                            </Rectangle>
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <!-- Row 2: Glowing Pill Progress Bar -->
+                                    <Border Grid.Row="2" Height="5.5" CornerRadius="2.75" Background="#22FFFFFF" ClipToBounds="True" Margin="0,0,0,6">
+                                        <ProgressBar x:Name="StatCpuBar" Minimum="0" Maximum="100" Value="18" Foreground="{DynamicResource DynamicAccentBrush}" Background="Transparent" BorderThickness="0" />
+                                    </Border>
+
+                                    <!-- Row 3: GHz & Temp Footer -->
+                                    <Grid Grid.Row="3">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                            <TextBlock x:Name="CpuSparkText" Text="✦ " Foreground="#FB7185" FontSize="9" VerticalAlignment="Center" />
+                                            <TextBlock x:Name="StatCpuFreqText" Text="3.6 GHz" Foreground="#94A3B8" FontSize="9" FontWeight="Medium" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                            <TextBlock Text="🌡 " Foreground="#94A3B8" FontSize="9" VerticalAlignment="Center" />
+                                            <TextBlock x:Name="StatCpuTempText" Text="42°C" Foreground="#E2E8F0" FontSize="9.5" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+
+                            <!-- ========================================== -->
+                            <!-- CARD 2: GPU (Icon + 5-Bar Chart + Metrics) -->
+                            <!-- ========================================== -->
+                            <Border x:Name="StatGpuCardBorder" Grid.Column="2" CornerRadius="20" BorderThickness="1" BorderBrush="#28FFFFFF" Padding="10,9" ClipToBounds="True">
+                                <Border.Background>
+                                    <RadialGradientBrush Center="0.85,0.9" GradientOrigin="0.85,0.9" RadiusX="0.85" RadiusY="0.85">
+                                        <GradientStop x:Name="GpuCardGlowStop" Color="#3210B981" Offset="0.0" />
+                                        <GradientStop Color="#E60B0E18" Offset="0.75" />
+                                        <GradientStop Color="#F2080A12" Offset="1.0" />
+                                    </RadialGradientBrush>
+                                </Border.Background>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Row 0: GPU Icon Badge + Title & Model -->
+                                    <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Top">
+                                        <Border x:Name="GpuIconBadge" Width="28" Height="28" CornerRadius="8" Background="#2C10B981" BorderBrush="#4810B981" BorderThickness="1" Margin="0,0,7,0">
+                                            <Path x:Name="GpuIconPath"
+                                                  Data="M 6,4 L 18,4 C 19.1,4 20,4.9 20,6 L 20,18 C 20,19.1 19.1,20 18,20 L 6,20 C 4.9,20 4,19.1 4,18 L 4,6 C 4,4.9 4.9,4 6,4 Z M 8,8 L 16,8 L 16,16 L 8,16 Z M 2,9 L 4,9 M 2,12 L 4,12 M 2,15 L 4,15 M 20,9 L 22,9 M 20,12 L 22,12 M 20,15 L 22,15 M 9,2 L 9,4 M 12,2 L 12,4 M 15,2 L 15,4 M 9,20 L 9,22 M 12,20 L 12,22 M 15,20 L 15,22"
+                                                  Stroke="#34D399" StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                                  Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="GPU" Foreground="#FFFFFF" FontSize="12" FontWeight="Bold" />
+                                            <TextBlock x:Name="StatGpuModelText" Text="RTX 3050" Foreground="#94A3B8" FontSize="9" TextTrimming="CharacterEllipsis" MaxWidth="72" />
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <!-- Row 1: Big Percentage + 5-Bar Mini Chart -->
+                                    <Grid Grid.Row="1" VerticalAlignment="Bottom" Margin="0,4,0,5">
+                                        <TextBlock x:Name="StatGpuPercentText" Text="10%" Foreground="#FFFFFF" FontSize="22" FontWeight="Bold" VerticalAlignment="Bottom" />
+
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="24">
+                                            <Rectangle x:Name="GpuHistBar1" Width="3.6" Height="22" RadiusX="1.8" RadiusY="1.8" Fill="#6610B981" Margin="1.1,0" RenderTransformOrigin="0.5,1.0">
+                                                <Rectangle.RenderTransform><ScaleTransform x:Name="GpuHistScale1" ScaleY="0.20" /></Rectangle.RenderTransform>
+                                            </Rectangle>
+                                            <Rectangle x:Name="GpuHistBar2" Width="3.6" Height="22" RadiusX="1.8" RadiusY="1.8" Fill="#8810B981" Margin="1.1,0" RenderTransformOrigin="0.5,1.0">
+                                                <Rectangle.RenderTransform><ScaleTransform x:Name="GpuHistScale2" ScaleY="0.32" /></Rectangle.RenderTransform>
+                                            </Rectangle>
+                                            <Rectangle x:Name="GpuHistBar3" Width="3.6" Height="22" RadiusX="1.8" RadiusY="1.8" Fill="#AA10B981" Margin="1.1,0" RenderTransformOrigin="0.5,1.0">
+                                                <Rectangle.RenderTransform><ScaleTransform x:Name="GpuHistScale3" ScaleY="0.25" /></Rectangle.RenderTransform>
+                                            </Rectangle>
+                                            <Rectangle x:Name="GpuHistBar4" Width="3.6" Height="22" RadiusX="1.8" RadiusY="1.8" Fill="#CC10B981" Margin="1.1,0" RenderTransformOrigin="0.5,1.0">
+                                                <Rectangle.RenderTransform><ScaleTransform x:Name="GpuHistScale4" ScaleY="0.45" /></Rectangle.RenderTransform>
+                                            </Rectangle>
+                                            <Rectangle x:Name="GpuHistBar5" Width="3.6" Height="22" RadiusX="1.8" RadiusY="1.8" Fill="#FF10B981" Margin="1.1,0,0,0" RenderTransformOrigin="0.5,1.0">
+                                                <Rectangle.RenderTransform><ScaleTransform x:Name="GpuHistScale5" ScaleY="0.60" /></Rectangle.RenderTransform>
+                                            </Rectangle>
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <!-- Row 2: Glowing Pill Progress Bar -->
+                                    <Border Grid.Row="2" Height="5.5" CornerRadius="2.75" Background="#22FFFFFF" ClipToBounds="True" Margin="0,0,0,6">
+                                        <ProgressBar x:Name="StatGpuBar" Minimum="0" Maximum="100" Value="10" Foreground="{DynamicResource DynamicAccentBrush}" Background="Transparent" BorderThickness="0" />
+                                    </Border>
+
+                                    <!-- Row 3: VRAM & Temp Footer -->
+                                    <Grid Grid.Row="3">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                            <TextBlock x:Name="GpuSparkText" Text="✦ " Foreground="#34D399" FontSize="9" VerticalAlignment="Center" />
+                                            <TextBlock x:Name="StatGpuVramFooterText" Text="1.2 / 6 GB" Foreground="#94A3B8" FontSize="9" FontWeight="Medium" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="52" />
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                            <TextBlock Text="🌡 " Foreground="#94A3B8" FontSize="9" VerticalAlignment="Center" />
+                                            <TextBlock x:Name="StatGpuTempText" Text="50°C" Foreground="#E2E8F0" FontSize="9.5" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+
+                            <!-- ========================================== -->
+                            <!-- CARD 3: RAM (Icon + 5-Bar Chart + Metrics) -->
+                            <!-- ========================================== -->
+                            <Border x:Name="StatRamCardBorder" Grid.Column="4" CornerRadius="20" BorderThickness="1" BorderBrush="#28FFFFFF" Padding="10,9" ClipToBounds="True">
+                                <Border.Background>
+                                    <RadialGradientBrush Center="0.85,0.9" GradientOrigin="0.85,0.9" RadiusX="0.85" RadiusY="0.85">
+                                        <GradientStop x:Name="RamCardGlowStop" Color="#32EC4899" Offset="0.0" />
+                                        <GradientStop Color="#E60B0E18" Offset="0.75" />
+                                        <GradientStop Color="#F2080A12" Offset="1.0" />
+                                    </RadialGradientBrush>
+                                </Border.Background>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Row 0: RAM Icon Badge + Title & Detail -->
+                                    <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Top">
+                                        <Border x:Name="RamIconBadge" Width="28" Height="28" CornerRadius="8" Background="#2CEC4899" BorderBrush="#48EC4899" BorderThickness="1" Margin="0,0,7,0">
+                                            <Path x:Name="RamIconPath"
+                                                  Data="M 4,7 L 20,7 L 20,16 L 4,16 Z M 7,10 L 9,10 L 9,13 L 7,13 Z M 11,10 L 13,10 L 13,13 L 11,13 Z M 15,10 L 17,10 L 17,13 L 15,13 Z M 7,16 L 7,19 M 12,16 L 12,19 M 17,16 L 17,19"
+                                                  Stroke="#F472B6" StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                                  Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="RAM" Foreground="#FFFFFF" FontSize="12" FontWeight="Bold" />
+                                            <TextBlock x:Name="StatRamDetailText" Text="0 / 0 GB" Foreground="#94A3B8" FontSize="9" TextTrimming="CharacterEllipsis" MaxWidth="72" />
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <!-- Row 1: Big Percentage + 5-Bar Mini Chart -->
+                                    <Grid Grid.Row="1" VerticalAlignment="Bottom" Margin="0,4,0,5">
+                                        <TextBlock x:Name="StatRamPercentText" Text="64%" Foreground="#FFFFFF" FontSize="22" FontWeight="Bold" VerticalAlignment="Bottom" />
+
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="24">
+                                            <Rectangle x:Name="RamHistBar1" Width="3.6" Height="22" RadiusX="1.8" RadiusY="1.8" Fill="#66EC4899" Margin="1.1,0" RenderTransformOrigin="0.5,1.0">
+                                                <Rectangle.RenderTransform><ScaleTransform x:Name="RamHistScale1" ScaleY="0.32" /></Rectangle.RenderTransform>
+                                            </Rectangle>
+                                            <Rectangle x:Name="RamHistBar2" Width="3.6" Height="22" RadiusX="1.8" RadiusY="1.8" Fill="#88EC4899" Margin="1.1,0" RenderTransformOrigin="0.5,1.0">
+                                                <Rectangle.RenderTransform><ScaleTransform x:Name="RamHistScale2" ScaleY="0.45" /></Rectangle.RenderTransform>
+                                            </Rectangle>
+                                            <Rectangle x:Name="RamHistBar3" Width="3.6" Height="22" RadiusX="1.8" RadiusY="1.8" Fill="#AAEC4899" Margin="1.1,0" RenderTransformOrigin="0.5,1.0">
+                                                <Rectangle.RenderTransform><ScaleTransform x:Name="RamHistScale3" ScaleY="0.52" /></Rectangle.RenderTransform>
+                                            </Rectangle>
+                                            <Rectangle x:Name="RamHistBar4" Width="3.6" Height="22" RadiusX="1.8" RadiusY="1.8" Fill="#CCEC4899" Margin="1.1,0" RenderTransformOrigin="0.5,1.0">
+                                                <Rectangle.RenderTransform><ScaleTransform x:Name="RamHistScale4" ScaleY="0.66" /></Rectangle.RenderTransform>
+                                            </Rectangle>
+                                            <Rectangle x:Name="RamHistBar5" Width="3.6" Height="22" RadiusX="1.8" RadiusY="1.8" Fill="#FFEC4899" Margin="1.1,0,0,0" RenderTransformOrigin="0.5,1.0">
+                                                <Rectangle.RenderTransform><ScaleTransform x:Name="RamHistScale5" ScaleY="0.86" /></Rectangle.RenderTransform>
+                                            </Rectangle>
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <!-- Row 2: Glowing Pill Progress Bar -->
+                                    <Border Grid.Row="2" Height="5.5" CornerRadius="2.75" Background="#22FFFFFF" ClipToBounds="True" Margin="0,0,0,6">
+                                        <ProgressBar x:Name="StatRamBar" Minimum="0" Maximum="100" Value="64" Foreground="{DynamicResource DynamicAccentBrush}" Background="Transparent" BorderThickness="0" />
+                                    </Border>
+
+                                    <!-- Row 3: Used GB Footer -->
+                                    <StackPanel Grid.Row="3" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock x:Name="RamSparkText" Text="✦ " Foreground="#F472B6" FontSize="9" VerticalAlignment="Center" />
+                                        <TextBlock x:Name="StatRamUsedFooterText" Text="9.6 GB Kullanımda" Foreground="#94A3B8" FontSize="9" FontWeight="Medium" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <!-- ====================================================== -->
+                            <!-- CARD 4: PIL & GÜÇ + EKRAN PARLAKLIĞI / GECE FİLTRESİ   -->
+                            <!-- ====================================================== -->
+                            <Border x:Name="StatPowerCardBorder" Grid.Column="6" CornerRadius="20" BorderThickness="1" BorderBrush="#28FFFFFF" Padding="10,9" ClipToBounds="True">
+                                <Border.Background>
+                                    <RadialGradientBrush Center="0.85,0.9" GradientOrigin="0.85,0.9" RadiusX="0.85" RadiusY="0.85">
+                                        <GradientStop x:Name="PowerCardGlowStop" Color="#32F43F5E" Offset="0.0" />
+                                        <GradientStop Color="#E60B0E18" Offset="0.75" />
+                                        <GradientStop Color="#F2080A12" Offset="1.0" />
+                                    </RadialGradientBrush>
+                                </Border.Background>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Row 0: Power/Battery Icon Badge + Title & Status -->
+                                    <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Top">
+                                        <Border x:Name="PowerIconBadge" Width="28" Height="28" CornerRadius="8" Background="#2CF43F5E" BorderBrush="#48F43F5E" BorderThickness="1" Margin="0,0,7,0">
+                                            <Path x:Name="PowerIconPath"
+                                                  Data="M 7,6 L 17,6 C 18.1,6 19,6.9 19,8 L 19,18 C 19,19.1 18.1,20 17,20 L 7,20 C 5.9,20 5,19.1 5,18 L 5,8 C 5,6.9 5.9,6 7,6 Z M 10,3 L 14,3 L 14,6 L 10,6 Z M 13,9 L 10,13.5 L 12.5,13.5 L 11,17 L 14.5,12.5 L 12,12.5 Z"
+                                                  Stroke="#FB7185" StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                                  Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="Pil &amp; Güç" Foreground="#FFFFFF" FontSize="12" FontWeight="Bold" />
+                                            <TextBlock x:Name="StatBatteryStatusText" Text="Takılı ⚡" Foreground="#94A3B8" FontSize="9" TextTrimming="CharacterEllipsis" MaxWidth="78" />
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <!-- Row 1: Big 100% + Night Mode Toggle Button -->
+                                    <Grid Grid.Row="1" VerticalAlignment="Bottom" Margin="0,4,0,4">
+                                        <TextBlock x:Name="StatBatteryPercentText" Text="100%" Foreground="#FFFFFF" FontSize="22" FontWeight="Bold" VerticalAlignment="Bottom" />
+
+                                        <Button x:Name="NightModeBtn" Style="{StaticResource IslandIconButton}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Padding="6,2" Click="NightModeBtn_Click" ToolTip="Sıcak Gece Filtresini Aç / Kapat">
+                                            <TextBlock x:Name="NightModeBtnText" Text="🌙 Gece" FontSize="9" Foreground="#FDE047" />
+                                        </Button>
+                                    </Grid>
+
+                                    <!-- Row 2: Adaptive Brightness Slider Bar (Looks like reference glowing bar + interactive screen brightness!) -->
+                                    <Grid Grid.Row="2" Margin="0,0,0,5">
+                                        <ProgressBar x:Name="StatBatteryBar" Visibility="Collapsed" />
+                                        <Slider x:Name="BrightnessSlider"
+                                                Minimum="25" Maximum="100" Value="100"
+                                                IsMoveToPointEnabled="True"
+                                                ToolTip="Ekran Parlaklığı Kaydırıcısı (%25 - %100)"
+                                                ValueChanged="BrightnessSlider_ValueChanged" />
+                                    </Grid>
+
+                                    <!-- Row 3: Brightness % & Health Footer -->
+                                    <Grid Grid.Row="3">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                            <TextBlock Text="☀ Ekran " Foreground="#94A3B8" FontSize="9" VerticalAlignment="Center" />
+                                            <TextBlock x:Name="BrightnessPercentText" Text="100%" Foreground="#E2E8F0" FontSize="9.5" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                        <TextBlock Text="♡ İyi" Foreground="#CBD5E1" FontSize="9" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                    </Grid>
+                                </Grid>
+                            </Border>
+
+                            <!-- ============================================================== -->
+                            <!-- CARD 5: WEATHER HEADER + WI-FI & BLUETOOTH MINI SUB-CARDS      -->
+                            <!-- ============================================================== -->
+                            <Border x:Name="StatEnvCardBorder" Grid.Column="8" CornerRadius="20" BorderThickness="1" BorderBrush="#28FFFFFF" Padding="10,8" ClipToBounds="True">
+                                <Border.Background>
+                                    <RadialGradientBrush Center="0.88,0.18" GradientOrigin="0.88,0.18" RadiusX="0.75" RadiusY="0.75">
+                                        <GradientStop x:Name="EnvCardGlowStop" Color="#35F43F5E" Offset="0.0" />
+                                        <GradientStop Color="#E60B0E18" Offset="0.75" />
+                                        <GradientStop Color="#F2080A12" Offset="1.0" />
+                                    </RadialGradientBrush>
+                                </Border.Background>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Top Half: Weather City, Temp & Cloud Accent (Click to change city or auto-detect GPS) -->
+                                    <Grid Grid.Row="0" Margin="2,1,2,6">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock x:Name="StatWeatherIconText" Grid.Column="0" Text="🌤️" FontSize="23" VerticalAlignment="Center" Margin="0,0,8,0" />
+
+                                        <Grid Grid.Column="1" VerticalAlignment="Center">
+                                            <!-- Normal Display Mode (Click to Edit City) -->
+                                            <StackPanel x:Name="WeatherCityDisplayPanel" Cursor="Hand" MouseLeftButtonDown="WeatherCityHeader_MouseLeftButtonDown" ToolTip="Konumu değiştirmek veya GPS ile yenilemek için tıklayın">
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <TextBlock x:Name="StatWeatherCityText" Text="Konum..." Foreground="#FFFFFF" FontSize="13.5" FontWeight="Bold" TextTrimming="CharacterEllipsis" MaxWidth="92" />
+                                                    <TextBlock Text=" 📍" FontSize="9.5" Opacity="0.65" VerticalAlignment="Center" />
+                                                </StackPanel>
+                                                <TextBlock x:Name="StatWeatherTitle" Text="Güncelleniyor..." Foreground="#94A3B8" FontSize="9.5" FontWeight="Medium" TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
+
+                                            <!-- Inline City Search Box (Shown when user clicks city name) -->
+                                            <Grid x:Name="WeatherCityEditPanel" Visibility="Collapsed" VerticalAlignment="Center">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBox x:Name="WeatherCityInputBox"
+                                                         Grid.Column="0"
+                                                         Background="#CC080A14"
+                                                         Foreground="#FFFFFF"
+                                                         BorderBrush="{DynamicResource DynamicAccentBorderBrush}"
+                                                         BorderThickness="1"
+                                                         Padding="5,2"
+                                                         FontSize="10.5"
+                                                         KeyDown="WeatherCityInputBox_KeyDown"
+                                                         ToolTip="Şehir veya ilçe adı yazıp Enter'a basın (Örn: Artvin, Ankara, Kadıköy)" />
+                                                <Button Grid.Column="1" Style="{StaticResource IslandIconButton}" Content="✓" Padding="5,2" Margin="3,0,0,0" FontSize="9.5" Click="WeatherCitySave_Click" ToolTip="Şehri Kaydet" />
+                                                <Button Grid.Column="2" Style="{StaticResource IslandIconButton}" Content="📍" Padding="4,2" Margin="2,0,0,0" FontSize="9.5" Click="WeatherCityAutoGps_Click" ToolTip="Windows GPS / Wi-Fi ile Otomatik Konum Bul" />
+                                            </Grid>
+                                        </Grid>
+
+                                        <!-- Decorative Cloud Vector Graphic (Tinted with Adaptive Accent) -->
+                                        <Path x:Name="WeatherDecorCloudPath"
+                                              Grid.Column="2"
+                                              Data="M 18.5,19 L 7,19 C 4.2,19 2,16.8 2,14 C 2,11.4 3.9,9.3 6.4,9 C 7.4,6.1 10.2,4 13.5,4 C 17.6,4 21,7.4 21,11.5 C 22.7,12.1 24,13.7 24,15.5 C 24,17.5 21.5,19 18.5,19 Z"
+                                              Fill="#38F43F5E" Width="32" Height="24" Stretch="Uniform" VerticalAlignment="Top" Margin="4,-2,-2,0" />
+                                    </Grid>
+
+                                    <!-- Bottom Half: Two Side-by-Side Sub-Cards (Wi-Fi/Speed + Bluetooth) -->
+                                    <Grid Grid.Row="1" VerticalAlignment="Bottom">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1.12*" />
+                                            <ColumnDefinition Width="6" />
+                                            <ColumnDefinition Width="0.95*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Sub-Card 1: Wi-Fi & Live Download Speed -->
+                                        <Border Grid.Column="0" Background="#16FFFFFF" BorderBrush="#22FFFFFF" BorderThickness="1" CornerRadius="12" Padding="7,5.5">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+
+                                                <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Path Data="M 2,8.5 C 7.5,4 16.5,4 22,8.5 M 5.5,12.5 C 9.2,9.5 14.8,9.5 18.5,12.5 M 9,16.5 C 10.8,15 13.2,15 15,16.5 M 12,20 L 12.01,20"
+                                                          Stroke="#FFFFFF" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                                          Width="11" Height="11" Stretch="Uniform" Margin="0,0,4,0" VerticalAlignment="Center" />
+                                                    <TextBlock x:Name="StatNetworkText" Text="Wi-Fi" Foreground="#FFFFFF" FontSize="9.5" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" MaxWidth="66" />
+                                                </StackPanel>
+
+                                                <Grid Grid.Row="1" Margin="0,4,0,0">
+                                                    <TextBlock x:Name="StatNetSpeedText" Text="↓ 0 KB/s" Foreground="#94A3B8" FontSize="8.8" FontWeight="Medium" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis" MaxWidth="64" />
+
+                                                    <!-- 4-Bar Signal Indicator (Adaptive Accent) -->
+                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                                                        <Rectangle x:Name="WifiBar1" Width="2.2" Height="4" RadiusX="1" RadiusY="1" Fill="#F43F5E" Margin="0.8,0" VerticalAlignment="Bottom" />
+                                                        <Rectangle x:Name="WifiBar2" Width="2.2" Height="6.5" RadiusX="1" RadiusY="1" Fill="#F43F5E" Margin="0.8,0" VerticalAlignment="Bottom" />
+                                                        <Rectangle x:Name="WifiBar3" Width="2.2" Height="9" RadiusX="1" RadiusY="1" Fill="#F43F5E" Margin="0.8,0" VerticalAlignment="Bottom" />
+                                                        <Rectangle x:Name="WifiBar4" Width="2.2" Height="11.5" RadiusX="1" RadiusY="1" Fill="#F43F5E" Margin="0.8,0,0,0" VerticalAlignment="Bottom" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Grid>
+                                        </Border>
+
+                                        <!-- Sub-Card 2: Bluetooth -->
+                                        <Border Grid.Column="2" Background="#16FFFFFF" BorderBrush="#22FFFFFF" BorderThickness="1" CornerRadius="12" Padding="7,5.5">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+
+                                                <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Path Data="M 6.5,6.5 L 17.5,17.5 L 12,23 L 12,1 L 17.5,6.5 L 6.5,17.5"
+                                                          Stroke="#FFFFFF" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                                          Width="10" Height="11" Stretch="Uniform" Margin="0,0,4,0" VerticalAlignment="Center" />
+                                                    <TextBlock Text="Bluetooth" Foreground="#FFFFFF" FontSize="9.5" FontWeight="SemiBold" />
+                                                </StackPanel>
+
+                                                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,4,0,0" VerticalAlignment="Bottom">
+                                                    <TextBlock Text="✦ " Foreground="#64748B" FontSize="8.5" VerticalAlignment="Center" />
+                                                    <TextBlock x:Name="StatBluetoothText" Text="Cihaz yok" Foreground="#94A3B8" FontSize="8.8" FontWeight="Medium" TextTrimming="CharacterEllipsis" MaxWidth="58" VerticalAlignment="Center" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </Grid>
+
+                        <!-- ============================================== -->
+                        <!-- TAB 3: TIMER (POMODORO) & QUICK NOTES         -->
+                        <!-- ============================================== -->
+                        <!-- ============================================== -->
+                        <!-- TAB 3: TIMER (POMODORO) & QUICK NOTES         -->
+                        <!-- ============================================== -->
+                        <Grid x:Name="TabTimerView" Visibility="Collapsed">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="280" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Timer / Pomodoro Card with Circular Neon Ring -->
+                            <Border x:Name="TimerCardBorder" Grid.Column="0" CornerRadius="20" BorderThickness="1" BorderBrush="#28FFFFFF" Padding="12,10" ClipToBounds="True">
+                                <Border.Background>
+                                    <RadialGradientBrush Center="0.85,0.85" GradientOrigin="0.85,0.85" RadiusX="0.85" RadiusY="0.85">
+                                        <GradientStop x:Name="TimerCardGlowStop" Color="#30F43F5E" Offset="0.0" />
+                                        <GradientStop Color="#E60B0E18" Offset="0.75" />
+                                        <GradientStop Color="#F2080A12" Offset="1.0" />
+                                    </RadialGradientBrush>
+                                </Border.Background>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="104" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Left: Neon Circular Ring Countdown Timer -->
+                                    <Grid Grid.Column="0" Width="96" Height="96" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <!-- Subtle Dark Circular Track -->
+                                        <Ellipse Width="84" Height="84" Stroke="#20FFFFFF" StrokeThickness="4" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        
+                                        <!-- Animated Glowing Neon Arc -->
+                                        <Path x:Name="TimerRingArcPath" Stroke="{DynamicResource DynamicAccentBorderBrush}" StrokeThickness="4.2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+                                        <!-- Center Digital Timer & Label -->
+                                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                            <TextBlock x:Name="TimerTagText" Text="ODAKLAN" Foreground="{DynamicResource DynamicAccentBorderBrush}" FontSize="8.5" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,1" />
+                                            <TextBlock x:Name="TimerDisplay" Text="25:00" Foreground="#FFFFFF" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" />
+                                            <TextBlock x:Name="TimerStateText" Text="✦ Çalışma" Foreground="#94A3B8" FontSize="8" HorizontalAlignment="Center" Margin="0,1,0,0" />
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <!-- Right: Presets & Glass Control Buttons -->
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0">
+                                        <!-- 4 Quick Preset Buttons in 2x2 Grid -->
+                                        <UniformGrid Columns="2" Rows="2" Margin="0,0,0,8">
+                                            <Button Style="{StaticResource IslandIconButton}" Content="25 Dk" Padding="4,2.5" Margin="2" Click="TimerPreset_Click" Tag="25" />
+                                            <Button Style="{StaticResource IslandIconButton}" Content="10 Dk" Padding="4,2.5" Margin="2" Click="TimerPreset_Click" Tag="10" />
+                                            <Button Style="{StaticResource IslandIconButton}" Content="5 Dk" Padding="4,2.5" Margin="2" Click="TimerPreset_Click" Tag="5" />
+                                            <Button Style="{StaticResource IslandIconButton}" Content="1 Dk" Padding="4,2.5" Margin="2" Click="TimerPreset_Click" Tag="1" />
+                                        </UniformGrid>
+
+                                        <!-- Start / Pause & Reset Action Buttons -->
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <Button x:Name="TimerStartPauseBtn" Grid.Column="0" Style="{StaticResource IslandIconButton}" Background="{DynamicResource DynamicPlayFillBrush}" BorderBrush="{DynamicResource DynamicAccentBorderBrush}" Foreground="#FFFFFF" FontWeight="Bold" Padding="8,5" Margin="0,0,4,0" Click="TimerStartPause_Click">
+                                                <TextBlock x:Name="TimerBtnLabel" Text="▶ Başlat" FontSize="11" />
+                                            </Button>
+                                            <Button Grid.Column="1" Style="{StaticResource IslandIconButton}" Content="↺" Padding="8,5" Click="TimerReset_Click" ToolTip="Sayacı Sıfırla" />
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <!-- Quick Notes Column Card -->
+                            <Border x:Name="NotesCardBorder" Grid.Column="2" CornerRadius="20" BorderThickness="1" BorderBrush="#28FFFFFF" Padding="12,10" ClipToBounds="True">
+                                <Border.Background>
+                                    <RadialGradientBrush Center="0.85,0.85" GradientOrigin="0.85,0.85" RadiusX="0.85" RadiusY="0.85">
+                                        <GradientStop x:Name="NotesCardGlowStop" Color="#30EC4899" Offset="0.0" />
+                                        <GradientStop Color="#E60B0E18" Offset="0.75" />
+                                        <GradientStop Color="#F2080A12" Offset="1.0" />
+                                    </RadialGradientBrush>
+                                </Border.Background>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Notes Header -->
+                                    <Grid Grid.Row="0" Margin="0,0,0,6">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Path Data="M 14,2 L 6,2 C 4.9,2 4,2.9 4,4 L 4,20 C 4,21.1 4.9,22 6,22 L 18,22 C 19.1,22 20,21.1 20,20 L 20,8 L 14,2 Z M 13,3.5 L 18.5,9 L 13,9 L 13,3.5 Z M 8,12 L 16,12 M 8,16 L 14,16"
+                                                  Stroke="#F472B6" StrokeThickness="1.5" Width="12" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                            <TextBlock Text="Hızlı Not Defteri" Foreground="#FFFFFF" FontWeight="Bold" FontSize="11.5" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                        <TextBlock Text="✦ Otomatik Kayıt" Foreground="{DynamicResource DynamicAccentBorderBrush}" FontSize="9.5" FontWeight="SemiBold" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                    </Grid>
+
+                                    <!-- Notes Text Area -->
+                                    <Border Grid.Row="1" Background="#CC0D101C" BorderBrush="#24FFFFFF" BorderThickness="1" CornerRadius="14" Padding="4">
+                                        <TextBox x:Name="QuickNoteTextBox"
+                                                 Background="Transparent"
+                                                 Foreground="#F1F5F9"
+                                                 BorderThickness="0"
+                                                 Padding="6,4"
+                                                 FontSize="11"
+                                                 AcceptsReturn="True"
+                                                 TextWrapping="Wrap"
+                                                 VerticalScrollBarVisibility="Auto"
+                                                 TextChanged="QuickNoteTextBox_TextChanged" />
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </Grid>
+
+                        <!-- ============================================== -->
+                        <!-- TAB 4: QUICK DOCK LAUNCHER & SETTINGS         -->
+                        <!-- ============================================== -->
+                        <Grid x:Name="TabDockView" Visibility="Collapsed">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1.28*" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="1*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Left: Mini App Dock Card -->
+                            <Border x:Name="DockCardBorder" Grid.Column="0" CornerRadius="20" BorderThickness="1" BorderBrush="#28FFFFFF" Padding="12,10" ClipToBounds="True"
+                                    AllowDrop="True"
+                                    Drop="Dock_Drop"
+                                    DragOver="FileTray_DragOver">
+                                <Border.Background>
+                                    <RadialGradientBrush Center="0.85,0.85" GradientOrigin="0.85,0.85" RadiusX="0.85" RadiusY="0.85">
+                                        <GradientStop x:Name="DockCardGlowStop" Color="#30F43F5E" Offset="0.0" />
+                                        <GradientStop Color="#E60B0E18" Offset="0.75" />
+                                        <GradientStop Color="#F2080A12" Offset="1.0" />
+                                    </RadialGradientBrush>
+                                </Border.Background>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Dock Header -->
+                                    <Grid Grid.Row="0" Margin="0,0,0,6">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Path Data="M 4.5,16.5 C 3,18 3,21 3,21 C 3,21 6,21 7.5,19.5 C 8.3,18.7 8.3,17.3 7.5,16.5 C 6.7,15.7 5.3,15.7 4.5,16.5 Z M 14.5,4 C 18,3 21,3 21,3 C 21,3 21,6 20,9.5 L 13,16.5 L 7.5,11 Z"
+                                                  Stroke="#FB7185" StrokeThickness="1.5" Width="12" Height="12" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                            <TextBlock Text="Hızlı Başlatıcı (Mini Dock)" Foreground="#FFFFFF" FontWeight="Bold" FontSize="11.5" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                        <Button Style="{StaticResource IslandIconButton}" Padding="7,2.5" HorizontalAlignment="Right" Click="SnapToggle_Click" ToolTip="Pencereleri ekranın sağına/soluna/ortasına hizalayın (Snap)">
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <TextBlock Text="🪟" FontSize="9.5" Margin="0,0,4,0" VerticalAlignment="Center" />
+                                                <TextBlock Text="Pencere Hizala" FontSize="9.5" FontWeight="SemiBold" Foreground="#E2E8F0" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                    </Grid>
+
+                                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                                        <WrapPanel x:Name="DockAppsPanel" Orientation="Horizontal" />
+                                    </ScrollViewer>
+                                </Grid>
+                            </Border>
+
+                            <!-- Right: Settings & Toggles Card -->
+                            <Border x:Name="SettingsCardBorder" Grid.Column="2" CornerRadius="20" BorderThickness="1" BorderBrush="#28FFFFFF" Padding="12,10" ClipToBounds="True">
+                                <Border.Background>
+                                    <RadialGradientBrush Center="0.85,0.85" GradientOrigin="0.85,0.85" RadiusX="0.85" RadiusY="0.85">
+                                        <GradientStop x:Name="SettingsCardGlowStop" Color="#30EC4899" Offset="0.0" />
+                                        <GradientStop Color="#E60B0E18" Offset="0.75" />
+                                        <GradientStop Color="#F2080A12" Offset="1.0" />
+                                    </RadialGradientBrush>
+                                </Border.Background>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Settings Header -->
+                                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,7" VerticalAlignment="Center">
+                                        <Path Data="M 12,15 C 10.3,15 9,13.7 9,12 C 9,10.3 10.3,9 12,9 C 13.7,9 15,10.3 15,12 C 15,13.7 13.7,15 12,15 Z M 19.4,13 C 19.5,12.7 19.5,12.3 19.5,12 C 19.5,11.7 19.5,11.3 19.4,11 L 21.5,9.3 C 21.7,9.1 21.8,8.9 21.6,8.6 L 19.6,5.1 C 19.5,4.9 19.2,4.8 19,4.9 L 16.5,5.9 C 16,5.5 15.4,5.2 14.8,4.9 L 14.4,2.3 C 14.4,2 14.2,1.8 13.9,1.8 L 10.1,1.8 C 9.8,1.8 9.6,2 9.6,2.3 L 9.2,4.9 C 8.6,5.2 8,5.5 7.5,5.9 L 5,4.9 C 4.8,4.8 4.5,4.9 4.4,5.1 L 2.4,8.6 C 2.2,8.9 2.3,9.1 2.5,9.3 L 4.6,11 C 4.5,11.3 4.5,11.7 4.5,12 C 4.5,12.3 4.5,12.7 4.6,13 L 2.5,14.7 C 2.3,14.9 2.2,15.1 2.4,15.4 L 4.4,18.9 C 4.5,19.1 4.8,19.2 5,19.1 L 7.5,18.1 C 8,18.5 8.6,18.8 9.2,19.1 L 9.6,21.7 C 9.6,22 9.8,22.2 10.1,22.2 L 13.9,22.2 C 14.2,22.2 14.4,22 14.4,21.7 L 14.8,19.1 C 15.4,18.8 16,18.5 16.5,18.1 L 19,19.1 C 19.2,19.2 19.5,19.1 19.6,18.9 L 21.6,15.4 C 21.8,15.1 21.7,14.9 21.5,14.7 L 19.4,13 Z"
+                                              Stroke="#F472B6" StrokeThickness="1.5" Width="12" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="Ada &amp; Oyun Ayarları" Foreground="#FFFFFF" FontWeight="Bold" FontSize="11.5" VerticalAlignment="Center" />
+                                    </StackPanel>
+
+                                    <!-- Settings Action & Toggle Buttons -->
+                                    <StackPanel Grid.Row="1" VerticalAlignment="Center">
+                                        <Button x:Name="GameModeToggleBtn" Style="{StaticResource IslandIconButton}" HorizontalContentAlignment="Left" Margin="0,0,0,4" Padding="8,3.5" Click="GameModeToggle_Click" ToolTip="Tam ekran oyun veya film açıkken adayı otomatik uyku moduna alır">
+                                            <TextBlock x:Name="GameModeToggleText" Text="🎮 Oyun/Film Oto-Uyku: Açık" FontSize="10" Foreground="#38BDF8" FontWeight="Medium" />
+                                        </Button>
+
+                                        <Button x:Name="SoundToggleBtn" Style="{StaticResource IslandIconButton}" HorizontalContentAlignment="Left" Margin="0,0,0,4" Padding="8,3.5" Click="SoundToggle_Click" ToolTip="Bildirim ses temasını değiştirmek için tıklayın (iOS Dinamik Ada, Su Damlası, Kristal Melodi, Windows 11, Sessiz)">
+                                            <TextBlock x:Name="SoundToggleText" Text="🔊 Ses: 🍎 iOS Dinamik Ada" FontSize="10" FontWeight="Medium" />
+                                        </Button>
+
+                                        <Button x:Name="StartupToggleBtn" Style="{StaticResource IslandIconButton}" HorizontalContentAlignment="Left" Margin="0,0,0,4" Padding="8,3.5" Click="StartupToggle_Click" ToolTip="Windows açıldığında dinamik adayı otomatik başlat">
+                                            <TextBlock x:Name="StartupToggleText" Text="🚀 Başlangıçta Aç: Kapalı" FontSize="10" FontWeight="Medium" />
+                                        </Button>
+
+                                        <Button x:Name="SnapSettingsBtn" Style="{StaticResource IslandIconButton}" HorizontalContentAlignment="Left" Padding="8,3.5" Click="SnapToggle_Click" ToolTip="Pencereleri ekranın sağına/soluna/ortasına hizalayın (Snap)">
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <TextBlock Text="🪟" FontSize="9.5" Margin="0,0,5,0" VerticalAlignment="Center" />
+                                                <TextBlock Text="Pencere Düzenleyici (Snap)" FontSize="10" FontWeight="Medium" Foreground="#A7F3D0" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </Grid>
+
+                <!-- ============================================================== -->
+                <!-- 3. OVERLAYS (Volume Scroll & Live Toast / Charging Banner)     -->
+                <!-- ============================================================== -->
+                <Border x:Name="QuickVolOverlay"
+                        Background="#E8090A10"
+                        CornerRadius="20"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        Visibility="Collapsed">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock x:Name="QuickVolText" Text="🔊 Ses: %60" Foreground="#FFFFFF" FontWeight="Bold" FontSize="12" Margin="0,0,8,0" />
+                        <ProgressBar x:Name="QuickVolBar" Width="100" Height="6" Minimum="0" Maximum="100" Value="60" Foreground="#6C63FF" Background="#22FFFFFF" BorderThickness="0" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Live Notification / Charging Toast Banner -->
+                <Border x:Name="ToastBannerOverlay"
+                        Background="#F20B0D16"
+                        CornerRadius="20"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        Visibility="Collapsed"
+                        Padding="14,0">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock x:Name="ToastIconText" Text="⚡" FontSize="14" Margin="0,0,7,0" VerticalAlignment="Center" />
+                        <TextBlock x:Name="ToastTitleText" Text="Şarj Ediliyor" Foreground="#FFFFFF" FontWeight="Bold" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center" />
+                        <TextBlock x:Name="ToastMessageText" Text="%85" Foreground="#00E5A3" FontWeight="SemiBold" FontSize="11.5" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="220" />
+                    </StackPanel>
+                </Border>
+
+                <!-- ============================================================== -->
+                <!-- 4. SPOTLIGHT QUICK SEARCH & CALCULATOR OVERLAY                 -->
+                <!-- ============================================================== -->
+                <Border x:Name="SpotlightOverlay"
+                        Background="#F5070912"
+                        CornerRadius="24"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        BorderBrush="{DynamicResource DynamicAccentBorderBrush}"
+                        BorderThickness="1.2"
+                        Padding="14,10"
+                        Visibility="Collapsed">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <!-- Search Bar Header with Icon, InputBox, and Close Button -->
+                        <Grid Grid.Row="0" Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="🔍" FontSize="14" VerticalAlignment="Center" Margin="0,0,8,0" />
+
+                            <TextBox x:Name="SpotlightInputBox"
+                                     Grid.Column="1"
+                                     Background="#1AFFFFFF"
+                                     Foreground="#FFFFFF"
+                                     CaretBrush="#FFFFFF"
+                                     BorderBrush="#35FFFFFF"
+                                     BorderThickness="1"
+                                     Padding="9,5"
+                                     FontSize="12"
+                                     FontWeight="Medium"
+                                     VerticalAlignment="Center"
+                                     KeyDown="SpotlightInputBox_KeyDown"
+                                     TextChanged="SpotlightInputBox_TextChanged" />
+
+                            <Button Grid.Column="2" Style="{StaticResource IslandIconButton}" Content="✕" Padding="8,4" Margin="6,0,0,0" FontSize="11" Click="SpotlightClose_Click" ToolTip="Aramayı Kapat (Esc)" />
+                        </Grid>
+
+                        <!-- Search Results List -->
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <StackPanel x:Name="SpotlightResultsPanel">
+                                <!-- Default Hint -->
+                                <Border x:Name="SpotlightDefaultHint" BorderBrush="#1CFFFFFF" BorderThickness="1" CornerRadius="12" Padding="12,10" Background="#0CFFFFFF" Margin="0,2">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="✦ Hızlı Arama &amp; Hesap Makinesi" Foreground="#E2E8F0" FontWeight="SemiBold" FontSize="11" HorizontalAlignment="Center" Margin="0,0,0,2" />
+                                        <TextBlock Text="Uygulama adı yazın (Chrome, Spotify), matematik işlemi yapın (150 * 1.20)&#x0a;veya doğrudan web'de arayın." Foreground="#94A3B8" FontSize="10" TextAlignment="Center" LineHeight="14" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+
+                <!-- ============================================================== -->
+                <!-- 5. LYRICS (CANLI ŞARKI SÖZLERİ & KARAOKE) OVERLAY              -->
+                <!-- ============================================================== -->
+                <Border x:Name="LyricsOverlay"
+                        Grid.RowSpan="2"
+                        Background="#F5070912"
+                        CornerRadius="24"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        BorderBrush="{DynamicResource DynamicAccentBorderBrush}"
+                        BorderThickness="1.2"
+                        Padding="14,10"
+                        Visibility="Collapsed">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <!-- Header: Song Title + Artist + Close Button -->
+                        <Grid Grid.Row="0" Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="🎤 " FontSize="13" VerticalAlignment="Center" Margin="0,0,4,0" />
+                                <TextBlock x:Name="LyricsOverlayTitle" Text="Şarkı Sözleri" Foreground="#FFFFFF" FontWeight="Bold" FontSize="12.5" VerticalAlignment="Center" MaxWidth="280" TextTrimming="CharacterEllipsis" />
+                                <TextBlock x:Name="LyricsOverlayArtist" Text=" • Sanatçı" Foreground="#94A3B8" FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0" MaxWidth="220" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+
+                            <Button Grid.Column="1" Style="{StaticResource IslandIconButton}" Content="✕" Padding="8,4" FontSize="11" Click="LyricsClose_Click" ToolTip="Şarkı Sözlerini Kapat" />
+                        </Grid>
+
+                        <!-- Lyrics Scroll Content -->
+                        <ScrollViewer x:Name="LyricsScrollViewer" Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <StackPanel x:Name="LyricsLinesPanel" Margin="4,2">
+                                <TextBlock x:Name="LyricsStatusHint" Text="Şarkı sözleri aranıyor..." Foreground="#94A3B8" FontSize="11.5" HorizontalAlignment="Center" Margin="0,24,0,0" />
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+
+                <!-- ============================================================== -->
+                <!-- 5.5 ONEE AVATAR LAB CONTROL PANEL OVERLAY                      -->
+                <!-- ============================================================== -->
+                <Border x:Name="AvatarOverlay"
+                        Grid.RowSpan="2"
+                        Background="#F5070912"
+                        CornerRadius="24"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        BorderBrush="{DynamicResource DynamicAccentBorderBrush}"
+                        BorderThickness="1.2"
+                        Padding="14,10"
+                        Visibility="Collapsed">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <!-- Header: Title + Status + Close Button -->
+                        <Grid Grid.Row="0" Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="👾 " FontSize="14" VerticalAlignment="Center" Margin="0,0,4,0" />
+                                <TextBlock Text="Onee Avatar Lab" Foreground="#FFFFFF" FontWeight="Bold" FontSize="12.5" VerticalAlignment="Center" />
+                                <TextBlock x:Name="AvatarCurrentAnimLabel" Text=" • idle" Foreground="{DynamicResource DynamicAccentBorderBrush}" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" Margin="6,0,0,0" />
+                                <TextBlock Text=" (Dinamik Adaya Entegre)" Foreground="#94A3B8" FontSize="10.5" VerticalAlignment="Center" Margin="6,0,0,0" />
+                            </StackPanel>
+
+                            <Button Grid.Column="1" Style="{StaticResource IslandIconButton}" Content="✕" Padding="8,4" FontSize="11" Click="AvatarClose_Click" ToolTip="Avatar Panelini Kapat (Esc)" />
+                        </Grid>
+
+                        <!-- Content Grid: Left Big Interactive Avatar Preview, Right Emotion Selector Buttons -->
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="140" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Big Avatar Host Preview Frame (Pure Vector WPF) -->
+                            <Border Grid.Column="0"
+                                    CornerRadius="18"
+                                    Background="#0E121D"
+                                    BorderBrush="{DynamicResource DynamicAccentSoftBrush}"
+                                    BorderThickness="1.2"
+                                    Padding="6"
+                                    ClipToBounds="True">
+                                <Grid>
+                                    <Viewbox Width="118" Height="118" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Canvas Width="300" Height="300">
+                                            <Canvas.RenderTransform>
+                                                <TranslateTransform X="150" Y="150" />
+                                            </Canvas.RenderTransform>
+                                            <!-- Head Base Path -->
+                                            <Path x:Name="LargeAvatarHeadPath" Fill="{DynamicResource DynamicAvatarBodyBrush}" />
+                                            <!-- Left Eye Path -->
+                                            <Path x:Name="LargeAvatarLeftEyePath" Fill="#111316" />
+                                            <!-- Right Eye Path -->
+                                            <Path x:Name="LargeAvatarRightEyePath" Fill="#111316" />
+                                        </Canvas>
+                                    </Viewbox>
+                                </Grid>
+                            </Border>
+
+                            <!-- Animation & Emotion Grid Selection Buttons -->
+                            <Border Grid.Column="2"
+                                    CornerRadius="18"
+                                    Background="#0A0D16"
+                                    BorderBrush="#20FFFFFF"
+                                    BorderThickness="1"
+                                    Padding="8,6">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Text="Hazır Duygular &amp; Animasyonlar (Tıklayın):" Foreground="#94A3B8" FontSize="9.5" FontWeight="SemiBold" Margin="2,0,0,5" />
+
+                                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                                        <WrapPanel x:Name="AvatarEmotionsPanel">
+                                            <!-- Standard procedural preset buttons -->
+                                            <Button Style="{StaticResource IslandIconButton}" Content="✨ idle" Tag="idle" Click="AvatarEmotionButton_Click" Margin="2" Padding="7,3.5" FontSize="10" />
+                                            <Button Style="{StaticResource IslandIconButton}" Content="🤔 thinking" Tag="thinking" Click="AvatarEmotionButton_Click" Margin="2" Padding="7,3.5" FontSize="10" />
+                                            <Button Style="{StaticResource IslandIconButton}" Content="😊 happy" Tag="happy" Click="AvatarEmotionButton_Click" Margin="2" Padding="7,3.5" FontSize="10" />
+                                            <Button Style="{StaticResource IslandIconButton}" Content="🎉 excited" Tag="excited" Click="AvatarEmotionButton_Click" Margin="2" Padding="7,3.5" FontSize="10" />
+                                            <Button Style="{StaticResource IslandIconButton}" Content="😲 surprised" Tag="surprised" Click="AvatarEmotionButton_Click" Margin="2" Padding="7,3.5" FontSize="10" />
+                                            <Button Style="{StaticResource IslandIconButton}" Content="🤨 confused" Tag="confused" Click="AvatarEmotionButton_Click" Margin="2" Padding="7,3.5" FontSize="10" />
+                                            <Button Style="{StaticResource IslandIconButton}" Content="🥱 bored" Tag="bored" Click="AvatarEmotionButton_Click" Margin="2" Padding="7,3.5" FontSize="10" />
+                                            <Button Style="{StaticResource IslandIconButton}" Content="😡 angry" Tag="angry" Click="AvatarEmotionButton_Click" Margin="2" Padding="7,3.5" FontSize="10" />
+                                            <Button Style="{StaticResource IslandIconButton}" Content="😴 drowsy" Tag="drowsy" Click="AvatarEmotionButton_Click" Margin="2" Padding="7,3.5" FontSize="10" />
+                                            <Button Style="{StaticResource IslandIconButton}" Content="🧐 curious" Tag="curious" Click="AvatarEmotionButton_Click" Margin="2" Padding="7,3.5" FontSize="10" />
+                                            <Button Style="{StaticResource IslandIconButton}" Content="😎 proud" Tag="proud" Click="AvatarEmotionButton_Click" Margin="2" Padding="7,3.5" FontSize="10" />
+                                            <Button Style="{StaticResource IslandIconButton}" Content="😳 shy" Tag="shy" Click="AvatarEmotionButton_Click" Margin="2" Padding="7,3.5" FontSize="10" />
+                                            <Button Style="{StaticResource IslandIconButton}" Content="🔍 searching" Tag="searching" Click="AvatarEmotionButton_Click" Margin="2" Padding="7,3.5" FontSize="10" />
+                                            <Button Style="{StaticResource IslandIconButton}" Content="💼 working" Tag="working" Click="AvatarEmotionButton_Click" Margin="2" Padding="7,3.5" FontSize="10" />
+                                            <Button Style="{StaticResource IslandIconButton}" Content="👂 listening" Tag="listening" Click="AvatarEmotionButton_Click" Margin="2" Padding="7,3.5" FontSize="10" />
+                                            <Button Style="{StaticResource IslandIconButton}" Content="🎈 celebrate" Tag="celebrate" Click="AvatarEmotionButton_Click" Margin="2" Padding="7,3.5" FontSize="10" />
+                                            <Button Style="{StaticResource IslandIconButton}" Content="😆 laughing" Tag="laughing" Click="AvatarEmotionButton_Click" Margin="2" Padding="7,3.5" FontSize="10" />
+                                            <Button Style="{StaticResource IslandIconButton}" Content="💤 sleeping" Tag="sleeping" Click="AvatarEmotionButton_Click" Margin="2" Padding="7,3.5" FontSize="10" />
+                                        </WrapPanel>
+                                    </ScrollViewer>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- ============================================================== -->
+                <!-- 6. WINDOW SNAP PILL / AKILLI PENCERE DÜZENLEYİCİ OVERLAY       -->
+                <!-- ============================================================== -->
+                <Border x:Name="SnapOverlay"
+                        Grid.RowSpan="2"
+                        Background="#F5070912"
+                        CornerRadius="24"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        BorderBrush="{DynamicResource DynamicAccentBorderBrush}"
+                        BorderThickness="1.2"
+                        Padding="14,10"
+                        Visibility="Collapsed">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <!-- Header: Window Title & Close Button -->
+                        <Grid Grid.Row="0" Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="🪟 " FontSize="13" VerticalAlignment="Center" Margin="0,0,4,0" />
+                                <TextBlock Text="Pencereyi Hizala: " Foreground="#94A3B8" FontSize="11.5" VerticalAlignment="Center" />
+                                <TextBlock x:Name="SnapTargetWindowTitle" Text="Aktif Pencere" Foreground="#FFFFFF" FontWeight="Bold" FontSize="12" VerticalAlignment="Center" MaxWidth="360" TextTrimming="CharacterEllipsis" Margin="4,0,0,0" />
+                            </StackPanel>
+
+                            <Button Grid.Column="1" Style="{StaticResource IslandIconButton}" Content="✕" Padding="8,4" FontSize="11" Click="SnapClose_Click" ToolTip="Kapat (Esc)" />
+                        </Grid>
+
+                        <!-- 6 Snap Tiles Grid -->
+                        <Grid Grid.Row="1" VerticalAlignment="Center" Margin="10,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="6" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="6" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="6" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="6" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="6" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- 1. Left Half (50%) -->
+                            <Button Grid.Column="0" Style="{StaticResource MinimalGhostButton}" Click="SnapLeftHalf_Click" ToolTip="Sol Yarım (%50)" Padding="0">
+                                <Border Background="#16FFFFFF" BorderBrush="#35FFFFFF" BorderThickness="1" CornerRadius="12" Padding="8,10" HorizontalAlignment="Stretch">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="◧" FontSize="20" Foreground="#E2E8F0" HorizontalAlignment="Center" Margin="0,0,0,4" />
+                                        <TextBlock Text="Sol 50%" FontSize="10.5" FontWeight="SemiBold" Foreground="#FFFFFF" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Ekranın Solu" FontSize="9" Foreground="#94A3B8" HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
+                            </Button>
+
+                            <!-- 2. Right Half (50%) -->
+                            <Button Grid.Column="2" Style="{StaticResource MinimalGhostButton}" Click="SnapRightHalf_Click" ToolTip="Sağ Yarım (%50)" Padding="0">
+                                <Border Background="#16FFFFFF" BorderBrush="#35FFFFFF" BorderThickness="1" CornerRadius="12" Padding="8,10" HorizontalAlignment="Stretch">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="◨" FontSize="20" Foreground="#E2E8F0" HorizontalAlignment="Center" Margin="0,0,0,4" />
+                                        <TextBlock Text="Sağ 50%" FontSize="10.5" FontWeight="SemiBold" Foreground="#FFFFFF" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Ekranın Sağı" FontSize="9" Foreground="#94A3B8" HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
+                            </Button>
+
+                            <!-- 3. Left Third (1/3) -->
+                            <Button Grid.Column="4" Style="{StaticResource MinimalGhostButton}" Click="SnapLeftThird_Click" ToolTip="Sol 1/3 (Belge/Sohbet)" Padding="0">
+                                <Border Background="#16FFFFFF" BorderBrush="#35FFFFFF" BorderThickness="1" CornerRadius="12" Padding="8,10" HorizontalAlignment="Stretch">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="▎▌" FontSize="18" Foreground="#E2E8F0" HorizontalAlignment="Center" Margin="0,2,0,4" />
+                                        <TextBlock Text="Sol 1/3" FontSize="10.5" FontWeight="SemiBold" Foreground="#FFFFFF" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Dar Panel" FontSize="9" Foreground="#94A3B8" HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
+                            </Button>
+
+                            <!-- 4. Right Two Thirds (2/3) -->
+                            <Button Grid.Column="6" Style="{StaticResource MinimalGhostButton}" Click="SnapRightTwoThirds_Click" ToolTip="Sağ 2/3 (Ana Çalışma)" Padding="0">
+                                <Border Background="#16FFFFFF" BorderBrush="#35FFFFFF" BorderThickness="1" CornerRadius="12" Padding="8,10" HorizontalAlignment="Stretch">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="▌▎" FontSize="18" Foreground="#E2E8F0" HorizontalAlignment="Center" Margin="0,2,0,4" />
+                                        <TextBlock Text="Sağ 2/3" FontSize="10.5" FontWeight="SemiBold" Foreground="#FFFFFF" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Geniş Panel" FontSize="9" Foreground="#94A3B8" HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
+                            </Button>
+
+                            <!-- 5. Center Float (72%) -->
+                            <Button Grid.Column="8" Style="{StaticResource MinimalGhostButton}" Click="SnapCenterFloat_Click" ToolTip="Merkez Odak (%72)" Padding="0">
+                                <Border Background="#16FFFFFF" BorderBrush="#35FFFFFF" BorderThickness="1" CornerRadius="12" Padding="8,10" HorizontalAlignment="Stretch">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="🗗" FontSize="19" Foreground="#E2E8F0" HorizontalAlignment="Center" Margin="0,1,0,4" />
+                                        <TextBlock Text="Merkez" FontSize="10.5" FontWeight="SemiBold" Foreground="#FFFFFF" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Odak Modu" FontSize="9" Foreground="#94A3B8" HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
+                            </Button>
+
+                            <!-- 6. Maximize (100%) -->
+                            <Button Grid.Column="10" Style="{StaticResource MinimalGhostButton}" Click="SnapMaximize_Click" ToolTip="Tam Ekran (%100)" Padding="0">
+                                <Border Background="#16FFFFFF" BorderBrush="#35FFFFFF" BorderThickness="1" CornerRadius="12" Padding="8,10" HorizontalAlignment="Stretch">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="🗖" FontSize="19" Foreground="#E2E8F0" HorizontalAlignment="Center" Margin="0,1,0,4" />
+                                        <TextBlock Text="Tam Ekran" FontSize="10.5" FontWeight="SemiBold" Foreground="#FFFFFF" HorizontalAlignment="Center" />
+                                        <TextBlock Text="Kapla" FontSize="9" Foreground="#94A3B8" HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </Border>
+
+        <!-- ============================================================== -->
+        <!-- AVATAR MINI MODE SPEECH BUBBLE (Comic / Glass Pop-up on Left)   -->
+        <!-- ============================================================== -->
+        <Grid x:Name="AvatarMiniSpeechBubble"
+              HorizontalAlignment="Right" VerticalAlignment="Top"
+              Margin="0,0,0,0"
+              Visibility="Collapsed"
+              Opacity="0"
+              IsHitTestVisible="False"
+              RenderTransformOrigin="1.0,0.5">
+            <Grid.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform x:Name="SpeechBubbleScale" ScaleX="0.2" ScaleY="0.2" />
+                    <TranslateTransform x:Name="SpeechBubbleTranslate" X="0" Y="0" />
+                </TransformGroup>
+            </Grid.RenderTransform>
+            <Grid>
+                <!-- Tail pointing right toward the avatar -->
+                <Polygon x:Name="SpeechBubbleTail"
+                         Points="0,12 8,18 0,24"
+                         Fill="#F20D121D"
+                         Stroke="{DynamicResource DynamicAccentBorderBrush}"
+                         StrokeThickness="1.2"
+                         HorizontalAlignment="Right"
+                         Margin="0,0,-6,0"
+                         VerticalAlignment="Center" />
+
+                <!-- Speech Bubble Body -->
+                <Border Background="#F20D121D"
+                        BorderBrush="{DynamicResource DynamicAccentBorderBrush}"
+                        BorderThickness="1.3"
+                        CornerRadius="16"
+                        Padding="11,6,13,6"
+                        MaxWidth="240">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock x:Name="SpeechBubbleIcon" Text="🎵" FontSize="13" Margin="0,0,7,0" VerticalAlignment="Center" />
+                        <TextBlock x:Name="SpeechBubbleText"
+                                   Text="Şarkı Adı — Sanatçı"
+                                   Foreground="#FFFFFF"
+                                   FontSize="11.5"
+                                   FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis"
+                                   MaxWidth="190"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- ============================================================== -->
+        <!-- AVATAR MINI MODE RADIAL QUICK CONTROLS (Long-Press Arc Menu)    -->
+        <!-- ============================================================== -->
+        <Canvas x:Name="AvatarMiniRadialCanvas"
+                Width="58" Height="58"
+                HorizontalAlignment="Center" VerticalAlignment="Top"
+                Margin="0,0,0,0"
+                Visibility="Collapsed"
+                Opacity="0"
+                ClipToBounds="False">
+            <Canvas.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform x:Name="RadialControlsScale" ScaleX="0.5" ScaleY="0.5" CenterX="29" CenterY="29" />
+                </TransformGroup>
+            </Canvas.RenderTransform>
+
+            <!-- 1. Play / Pause Button (Top-Left, ~135°) -->
+            <Button x:Name="RadialBtnPlayPause"
+                    Canvas.Left="-44" Canvas.Top="-10"
+                    Width="32" Height="32"
+                    Style="{StaticResource MinimalGhostButton}"
+                    Click="MiniRadialPlayPause_Click"
+                    ToolTip="Müziği Oynat / Duraklat"
+                    Cursor="Hand">
+                <Border Width="32" Height="32" CornerRadius="16"
+                        Background="#F50D111A" BorderBrush="{DynamicResource DynamicAccentBorderBrush}" BorderThickness="1.3">
+                    <TextBlock x:Name="RadialPlayPauseIcon" Text="⏯️" FontSize="12.5" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+            </Button>
+
+            <!-- 2. Next Track Button (Left, ~180°) -->
+            <Button x:Name="RadialBtnNext"
+                    Canvas.Left="-54" Canvas.Top="24"
+                    Width="32" Height="32"
+                    Style="{StaticResource MinimalGhostButton}"
+                    Click="MiniRadialNext_Click"
+                    ToolTip="Sonraki Şarkı"
+                    Cursor="Hand">
+                <Border Width="32" Height="32" CornerRadius="16"
+                        Background="#F50D111A" BorderBrush="{DynamicResource DynamicAccentBorderBrush}" BorderThickness="1.3">
+                    <TextBlock Text="⏭️" FontSize="12.5" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+            </Button>
+
+            <!-- 3. Screenshot Snip Button (Bottom-Left, ~225°) -->
+            <Button x:Name="RadialBtnSnip"
+                    Canvas.Left="-38" Canvas.Top="58"
+                    Width="32" Height="32"
+                    Style="{StaticResource MinimalGhostButton}"
+                    Click="MiniRadialSnip_Click"
+                    ToolTip="Hızlı Ekran Alıntısı"
+                    Cursor="Hand">
+                <Border Width="32" Height="32" CornerRadius="16"
+                        Background="#F50D111A" BorderBrush="{DynamicResource DynamicAccentBorderBrush}" BorderThickness="1.3">
+                    <TextBlock Text="📸" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+            </Button>
+
+            <!-- 4. Quick Volume Button (Bottom, ~270°) -->
+            <Button x:Name="RadialBtnVol"
+                    Canvas.Left="13" Canvas.Top="66"
+                    Width="32" Height="32"
+                    Style="{StaticResource MinimalGhostButton}"
+                    Click="MiniRadialVol_Click"
+                    ToolTip="Ses Düzeyi (+%10 / Döngü)"
+                    Cursor="Hand">
+                <Border Width="32" Height="32" CornerRadius="16"
+                        Background="#F50D111A" BorderBrush="{DynamicResource DynamicAccentBorderBrush}" BorderThickness="1.3">
+                    <TextBlock Text="🔊" FontSize="12.5" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+            </Button>
+        </Canvas>
+    </Grid>
+</Window>
