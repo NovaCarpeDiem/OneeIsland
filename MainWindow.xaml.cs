@@ -1116,6 +1116,16 @@ public partial class MainWindow : Window
             var settingsItem = new Forms.ToolStripMenuItem("⚙️ Ayarlar (Settings)");
             settingsItem.Click += (s, e) => OpenSettingsWindow();
 
+            var coffeeItem = new Forms.ToolStripMenuItem("☕ Geliştiriciye Kahve Ismarla (Buy Me a Coffee)");
+            coffeeItem.Click += (s, e) =>
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://www.buymeacoffee.com/NovaCarpeDiem") { UseShellExecute = true });
+                }
+                catch { }
+            };
+
             var exitItem = new Forms.ToolStripMenuItem("Çıkış");
             exitItem.Click += (s, e) =>
             {
@@ -1129,6 +1139,7 @@ public partial class MainWindow : Window
             contextMenu.Items.Add(resetPosItem);
             contextMenu.Items.Add(new Forms.ToolStripSeparator());
             contextMenu.Items.Add(settingsItem);
+            contextMenu.Items.Add(coffeeItem);
             contextMenu.Items.Add(new Forms.ToolStripSeparator());
             contextMenu.Items.Add(exitItem);
 

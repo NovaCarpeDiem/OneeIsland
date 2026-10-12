@@ -8,6 +8,7 @@
     <img src="https://img.shields.io/badge/Windows-11%20%7C%2010-0078D4?style=flat-square&logo=windows" alt="Windows" />
     <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License" />
     <img src="https://img.shields.io/badge/Motion-144Hz%20Spring%20Physics-F43F5E?style=flat-square" alt="144Hz" />
+    <a href="https://www.buymeacoffee.com/NovaCarpeDiem"><img src="https://img.shields.io/badge/Buy_Me_a_Coffee-FFDD00?style=flat-square&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me A Coffee" /></a>
   </p>
 
   <br />
@@ -106,11 +107,16 @@ dotnet run -c Release
 
 ## ☕ Support & Sponsorship
 
-If you enjoy **Onee Island** and would like to support continuous development and new features:
+If you enjoy **Onee Island** and would like to support continuous development, new features, and animations:
 
-<!-- Add your Buy Me a Coffee / Ko-fi link here -->
-- 💖 Star this repository on GitHub!
-- ☕ [Buy Me a Coffee](https://www.buymeacoffee.com) *(Link coming soon)*
+<p align="center">
+  <a href="https://www.buymeacoffee.com/NovaCarpeDiem" target="_blank">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="50" style="height: 50px !important;width: 217px !important;" />
+  </a>
+</p>
+
+- ⭐ **Star this repository:** Helping the project gain visibility on GitHub means the world!
+- ☕ **Buy Me a Coffee:** Support development directly at [buymeacoffee.com/NovaCarpeDiem](https://www.buymeacoffee.com/NovaCarpeDiem).
 
 ---
 
