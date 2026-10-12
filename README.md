@@ -4,6 +4,11 @@
   <p><strong>A hardware-accelerated, fluid Apple Dynamic Island & living 3D desktop companion for Windows 11 & 10.</strong></p>
 
   <p>
+    <a href="README.md"><b>English</b></a> •
+    <a href="README.tr.md"><b>Türkçe</b></a>
+  </p>
+
+  <p>
     <img src="https://img.shields.io/badge/.NET-10.0-512BD4?style=flat-square&logo=dotnet" alt=".NET 10" />
     <img src="https://img.shields.io/badge/Windows-11%20%7C%2010-0078D4?style=flat-square&logo=windows" alt="Windows" />
     <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License" />
