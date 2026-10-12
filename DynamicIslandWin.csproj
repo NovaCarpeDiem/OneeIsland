@@ -24,6 +24,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="app.ico" />
+    <Resource Include="app_icon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="Avatar\**\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

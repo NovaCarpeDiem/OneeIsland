@@ -14,7 +14,8 @@
 *.trigger
 test_trigger.txt
 island_cmd.txt
-snap_island.png
+snap_*.png
+generate_showcase.py
 desktop_test.png
 screenshot_top.png
 app_icon_avatar_preview.png

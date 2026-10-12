@@ -2,7 +2,6 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Dynamic Island • Ayarlar"
-        Icon="app.ico"
         Width="510" Height="710"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
