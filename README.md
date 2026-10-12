@@ -9,11 +9,19 @@
   </p>
 
   <p>
+    <img src="https://img.shields.io/badge/Release-v1.0.0-blue?style=flat-square&logo=github" alt="Release v1.0.0" />
+    <a href="https://github.com/NovaCarpeDiem/OneeIsland/releases/download/v1.0.0/OneeIsland-v1.0.0-win-x64.zip"><img src="https://img.shields.io/badge/Download-ZIP%20(v1.0.0)-success?style=flat-square&logo=windows" alt="Download ZIP" /></a>
     <img src="https://img.shields.io/badge/.NET-10.0-512BD4?style=flat-square&logo=dotnet" alt=".NET 10" />
     <img src="https://img.shields.io/badge/Windows-11%20%7C%2010-0078D4?style=flat-square&logo=windows" alt="Windows" />
     <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License" />
     <img src="https://img.shields.io/badge/Motion-144Hz%20Spring%20Physics-F43F5E?style=flat-square" alt="144Hz" />
     <a href="https://www.buymeacoffee.com/NovaCarpeDiem"><img src="https://img.shields.io/badge/Buy_Me_a_Coffee-FFDD00?style=flat-square&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me A Coffee" /></a>
+  </p>
+
+  <p>
+    <a href="https://github.com/NovaCarpeDiem/OneeIsland/releases/download/v1.0.0/OneeIsland-v1.0.0-win-x64.zip">
+      <img src="https://img.shields.io/badge/%E2%AC%87%EF%B8%8F%20Download%20Onee%20Island%20v1.0.0-Portable%20x64%20ZIP-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Download ZIP Badge" />
+    </a>
   </p>
 
   <br />

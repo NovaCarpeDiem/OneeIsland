@@ -9,11 +9,19 @@
   </p>
 
   <p>
+    <img src="https://img.shields.io/badge/S%C3%BCr%C3%BCm-v1.0.0-blue?style=flat-square&logo=github" alt="Sürüm v1.0.0" />
+    <a href="https://github.com/NovaCarpeDiem/OneeIsland/releases/download/v1.0.0/OneeIsland-v1.0.0-win-x64.zip"><img src="https://img.shields.io/badge/%C4%B0ndir-ZIP%20(v1.0.0)-success?style=flat-square&logo=windows" alt="ZIP İndir" /></a>
     <img src="https://img.shields.io/badge/.NET-10.0-512BD4?style=flat-square&logo=dotnet" alt=".NET 10" />
     <img src="https://img.shields.io/badge/Windows-11%20%7C%2010-0078D4?style=flat-square&logo=windows" alt="Windows" />
     <img src="https://img.shields.io/badge/Lisans-MIT-green?style=flat-square" alt="Lisans" />
     <img src="https://img.shields.io/badge/Ak%C4%B1c%C4%B1l%C4%B1k-144Hz%20Yay%20Fizi%C4%9Fi-F43F5E?style=flat-square" alt="144Hz" />
     <a href="https://www.buymeacoffee.com/NovaCarpeDiem"><img src="https://img.shields.io/badge/Buy_Me_a_Coffee-FFDD00?style=flat-square&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me A Coffee" /></a>
+  </p>
+
+  <p>
+    <a href="https://github.com/NovaCarpeDiem/OneeIsland/releases/download/v1.0.0/OneeIsland-v1.0.0-win-x64.zip">
+      <img src="https://img.shields.io/badge/%E2%AC%87%EF%B8%8F%20Onee%20Island%20v1.0.0%20%C4%B0ndir%20(Kurulumsuz%20ZIP)-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="ZIP İndir Rozeti" />
+    </a>
   </p>
 
   <br />
